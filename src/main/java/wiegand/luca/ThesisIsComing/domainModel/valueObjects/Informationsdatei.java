@@ -14,7 +14,7 @@ public class Informationsdatei {
         this.titel = titel;
         this.beschreibung = beschreibung;
         this.uploaderName = uploaderName;
-        this.uploadDatum = LocalDateTime.now();
+        this.uploadDatum = uploadDatum;
         this.dateisystemPfad = dateisystemPfad;
     }
 
