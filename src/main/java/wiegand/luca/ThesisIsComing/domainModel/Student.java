@@ -10,9 +10,7 @@ import java.util.UUID;
 
 public class Student {
 
-    @Id
     private UUID id;
-
     private String name;
     Kontaktinformationen kontaktinformationen;
     private HashSet<BestandenerKurs> bestandeneKurse;
