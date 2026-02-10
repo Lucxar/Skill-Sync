@@ -1,4 +1,4 @@
-package wiegand.luca.ThesisIsComing.domainService;
+package wiegand.luca.ThesisIsComing.ApplicationService;
 
 import wiegand.luca.ThesisIsComing.domainModel.Betreuer;
 
