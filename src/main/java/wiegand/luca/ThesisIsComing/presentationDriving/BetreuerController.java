@@ -31,7 +31,7 @@ public class BetreuerController {
     }
 
     @GetMapping("/betreuer")
-    public void getAllBetreuer(Model model) {
+    public String getAllBetreuer(Model model) {
         List<Betreuer> list = service.listAll();
         model.addAttribute("betreuerListe", list);
         return "/betreuer/list";
@@ -39,10 +39,10 @@ public class BetreuerController {
 
 
     @GetMapping("/betreuer/{id}")
-    public  void getBetreuerById(@PathVariable UUID id, Model model) {
+    public String getBetreuerById(@PathVariable UUID id, Model model) {
         Betreuer betreuer = service.getById(id);
         model.addAttribute("betreuer", betreuer);
-        return "/betreuer/detail";
+        return "betreuer/detail";
     }
 
 
