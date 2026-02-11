@@ -1,4 +1,4 @@
-package wiegand.luca.ThesisIsComing.ApplicationService;
+package wiegand.luca.ThesisIsComing.presentationDriving;
 
 import org.springframework.stereotype.Controller;
 
