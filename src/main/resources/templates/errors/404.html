@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html lang="de" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Nicht gefunden</title>
+</head>
+<body>
+<main>
+    <section>
+        <h1>Seite nicht gefunden</h1>
+        <p th:if="${message}" th:text="${message}">Nicht gefunden.</p>
+        <p th:if="${message == null}">Nicht gefunden.</p>
+    </section>
+</main>
+</body>
+</html>

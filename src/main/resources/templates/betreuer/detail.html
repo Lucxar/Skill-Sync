@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="de" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Betreuerdetail</title>
+</head>
+<body>
+<main>
+    <section>
+        <h1 th:text="${betreuer.name}">Betreuer</h1>
+
+        <div>
+            <h2>Kontakt</h2>
+            <p th:if="${betreuer.kontaktinformationen != null}">
+                <span th:text="${betreuer.kontaktinformationen.email}">email</span>
+            </p>
+            <p th:if="${betreuer.kontaktinformationen != null}">
+                <span th:text="${betreuer.kontaktinformationen.matrikelnummer}">matrikel</span>
+            </p>
+            <p th:if="${betreuer.kontaktinformationen == null}">Keine Kontaktinformationen</p>
+        </div>
+
+        <div>
+            <h2>Fachgebiete</h2>
+            <ul>
+                <li th:each="f : ${betreuer.fachgebiete}" th:text="${f.bezeichnung}">Fachgebiet</li>
+            </ul>
+        </div>
+
+        <div>
+            <h2>Links</h2>
+            <ul>
+                <li th:each="l : ${betreuer.links}">
+                    <a th:href="${l.url}" th:text="${l.anzeigetext} ?: ${l.url}">Link</a>
+                </li>
+            </ul>
+        </div>
+
+        <div>
+            <h2>Dateien</h2>
+            <ul>
+                <li th:each="d : ${betreuer.dateien}">
+                    <span th:text="${d.titel}">Titel</span>
+                </li>
+            </ul>
+        </div>
+    </section>
+</main>
+</body>
+</html>
