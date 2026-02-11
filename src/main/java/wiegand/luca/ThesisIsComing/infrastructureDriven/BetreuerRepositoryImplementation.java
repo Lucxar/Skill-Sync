@@ -2,7 +2,7 @@ package wiegand.luca.ThesisIsComing.infrastructureDriven;
 
 import org.springframework.stereotype.Repository;
 import wiegand.luca.ThesisIsComing.domainModel.Betreuer;
-import wiegand.luca.ThesisIsComing.domainService.BetreuerRepository;
+import wiegand.luca.ThesisIsComing.ApplicationService.BetreuerRepository;
 import wiegand.luca.ThesisIsComing.domainModel.valueObjects.Fachgebiet;
 import wiegand.luca.ThesisIsComing.domainModel.valueObjects.Informationsdatei;
 import wiegand.luca.ThesisIsComing.domainModel.valueObjects.Kontaktinformationen;
@@ -140,8 +140,8 @@ public class BetreuerRepositoryImplementation implements BetreuerRepository {
         if (dtos == null) {
             return result;
         }
-        for (LinkDto dto : dtos) {
-            result.add(new Link(dto.url()));
+        for (LinkDto linkDto : dtos) {
+            result.add(new Link(linkDto.url(), linkDto.anzeigetext()));
         }
         return result;
     }
@@ -152,7 +152,7 @@ public class BetreuerRepositoryImplementation implements BetreuerRepository {
             return result;
         }
         for (Link link : links) {
-            result.add(new LinkDto(null, link.getUrl()));
+            result.add(new LinkDto(null, link.getUrl(), link.getAnzeigetext()));
         }
         return result;
     }
