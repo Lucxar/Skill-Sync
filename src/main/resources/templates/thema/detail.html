@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="de" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Themadetail</title>
+</head>
+<body>
+<main>
+    <section>
+        <h1 th:text="${thema.titel}">Thema</h1>
+
+        <div>
+            <h2>Beschreibung</h2>
+            <p th:if="${thema.beschreibungMarkdown == null}">Keine Beschreibung vorhanden</p>
+            <p th:if="${thema.beschreibungMarkdown != null}" th:text="${thema.beschreibungMarkdown}">Beschreibung</p>
+        </div>
+
+        <div>
+            <h2>Fachgebiete</h2>
+            <ul>
+                <li th:each="f : ${thema.fachgebiete}" th:text="${f.bezeichnung}">Fachgebiet</li>
+            </ul>
+            <p th:if="${thema.fachgebiete == null || #lists.isEmpty(thema.fachgebiete)}">Keine Fachgebiete</p>
+        </div>
+
+        <div>
+            <h2>Voraussetzungen</h2>
+            <ul>
+                <li th:each="k : ${thema.voraussetzungen}" th:text="${k.kursbezeichnung}">Kurs</li>
+            </ul>
+            <p th:if="${thema.voraussetzungen == null || #lists.isEmpty(thema.voraussetzungen)}">Keine Voraussetzungen</p>
+        </div>
+
+        <div>
+            <h2>Links</h2>
+            <ul>
+                <li th:each="l : ${thema.links}">
+                    <a th:href="${l.url}" th:text="${l.anzeigetext} ?: ${l.url}">Link</a>
+                </li>
+            </ul>
+            <p th:if="${thema.links == null || #lists.isEmpty(thema.links)}">Keine Links</p>
+        </div>
+
+        <div>
+            <h2>Dateien</h2>
+            <ul>
+                <li th:each="d : ${thema.dateien}">
+                    <span th:text="${d.titel}">Titel</span>
+                </li>
+            </ul>
+            <p th:if="${thema.dateien == null || #lists.isEmpty(thema.dateien)}">Keine Dateien</p>
+        </div>
+    </section>
+</main>
+</body>
+</html>

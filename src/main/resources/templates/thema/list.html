@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html lang="de" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Themenliste</title>
+</head>
+<body>
+<main>
+    <section>
+        <h1>Themenliste</h1>
+        <ul>
+            <li th:each="t : ${themen}">
+                <a th:href="@{/themen/{id}(id=${t.id})}" th:text="${t.titel}">Thema</a>
+            </li>
+        </ul>
+        <p th:if="${themen == null || #lists.isEmpty(themen)}">Keine Themen vorhanden</p>
+    </section>
+</main>
+</body>
+</html>
