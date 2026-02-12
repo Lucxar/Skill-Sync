@@ -11,17 +11,18 @@ import static com.tngtech.archunit.lang.syntax.ArchRuleDefinition.*;
 
 public class OnionArchitectureTest {
 
-    private static final String BASE = "com.example";
+    private static final String BASE = "wiegand.luca.ThesisIsComing";
     private static final JavaClasses CLASSES = new ClassFileImporter().importPackages(BASE);
 
-    private static final String DOMAIN = "..domain..";
-    private static final String APPLICATION = "..application..";
-    private static final String INFRASTRUCTURE = "..infrastructure..";
-    private static final String PRESENTATION = "..presentation..";
+    private static final String DOMAIN = "..domainModel..";
+    private static final String DOMAIN_SERVICE = "..domainService..";
+    private static final String APPLICATION = "..ApplicationService..";
+    private static final String INFRASTRUCTURE = "..infrastructureDriven..";
+    private static final String PRESENTATION = "..presentationDriving..";
 
     @ArchTest
     static final ArchRule domain_must_not_depend_on_outer_layers =
-            noClasses().that().resideInAPackage(DOMAIN)
+            noClasses().that().resideInAnyPackage(DOMAIN, DOMAIN_SERVICE)
                     .should().dependOnClassesThat()
                     .resideInAnyPackage(APPLICATION, INFRASTRUCTURE, PRESENTATION);
 
@@ -33,13 +34,13 @@ public class OnionArchitectureTest {
 
     @ArchTest
     static final ArchRule domain_and_application_must_not_depend_on_infrastructure =
-            noClasses().that().resideInAnyPackage(DOMAIN, APPLICATION)
+            noClasses().that().resideInAnyPackage(DOMAIN, DOMAIN_SERVICE, APPLICATION)
                     .should().dependOnClassesThat()
                     .resideInAPackage(INFRASTRUCTURE);
 
     @ArchTest
     static final ArchRule inner_layers_must_not_depend_on_presentation =
-            noClasses().that().resideInAnyPackage(DOMAIN, APPLICATION, INFRASTRUCTURE)
+            noClasses().that().resideInAnyPackage(DOMAIN, DOMAIN_SERVICE, APPLICATION, INFRASTRUCTURE)
                     .should().dependOnClassesThat()
                     .resideInAPackage(PRESENTATION);
 }
