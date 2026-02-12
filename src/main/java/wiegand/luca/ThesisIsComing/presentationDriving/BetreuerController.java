@@ -7,6 +7,8 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import wiegand.luca.ThesisIsComing.ApplicationService.BetreuerService;
 import wiegand.luca.ThesisIsComing.domainModel.Betreuer;
+import wiegand.luca.ThesisIsComing.presentationDriving.exception.BetreuerListIsEmpty;
+
 import java.util.UUID;
 
 @Controller
@@ -26,7 +28,13 @@ public class BetreuerController {
 
     @GetMapping("/betreuer")
     public String getAllBetreuer(Model model) {
-        model.addAttribute("betreuer", service.listAll());
+        var betreuerListe = service.listAll();
+        if (betreuerListe.isEmpty()) {
+            throw new BetreuerListIsEmpty(
+                    "Keine Betreuer gefunden"
+            );
+        }
+        model.addAttribute("betreuer", betreuerListe);
         return "betreuer/list";
     }
 
