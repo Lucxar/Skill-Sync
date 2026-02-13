@@ -17,10 +17,6 @@ public class ThemaService {
         this.repository = repository;
     }
 
-    public void speicherThemaAenderungen() {
-
-    }
-
     public List<Thema> listAll() {
         return StreamSupport.stream(repository.findAll().spliterator(), false)
                 .toList();
