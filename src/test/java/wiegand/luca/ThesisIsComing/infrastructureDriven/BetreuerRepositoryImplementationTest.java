@@ -10,6 +10,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.TestPropertySource;
 import wiegand.luca.ThesisIsComing.ApplicationService.BetreuerRepository;
+import wiegand.luca.ThesisIsComing.TestPostgresContainer;
 import wiegand.luca.ThesisIsComing.domainModel.Betreuer;
 import wiegand.luca.ThesisIsComing.domainModel.valueObjects.Kontaktinformationen;
 
@@ -24,7 +25,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 @Import(BetreuerRepositoryImplementation.class)
 @TestPropertySource(properties = "spring.flyway.enabled=true")
 @ActiveProfiles("test")
-class BetreuerRepositoryImplementationTest extends wiegand.luca.ThesisIsComing.TestPostgresContainer {
+class BetreuerRepositoryImplementationTest extends TestPostgresContainer {
 
     @Autowired
     private BetreuerRepository betreuerRepository;
