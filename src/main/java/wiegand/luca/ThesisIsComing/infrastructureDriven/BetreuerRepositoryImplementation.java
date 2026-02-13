@@ -3,6 +3,7 @@ package wiegand.luca.ThesisIsComing.infrastructureDriven;
 import org.springframework.data.jdbc.core.JdbcAggregateTemplate;
 import org.springframework.stereotype.Repository;
 import wiegand.luca.ThesisIsComing.domainModel.Betreuer;
+import wiegand.luca.ThesisIsComing.domainModel.Thema;
 import wiegand.luca.ThesisIsComing.ApplicationService.BetreuerRepository;
 
 import wiegand.luca.ThesisIsComing.infrastructureDriven.dto.BetreuerDto;
@@ -47,6 +48,41 @@ public class BetreuerRepositoryImplementation implements BetreuerRepository {
                 : jdbcAggregateTemplate.insert(dto);
         return Mapper.toBetreuer(saved);
     }
+
+    @Override
+    public List<UUID> findThemaIdsByBetreuerId(UUID betreuerId) {
+        return dataRepository.findThemaIdsByBetreuerId(betreuerId);
+    }
+
+    @Override
+    public List<Thema> findThemenByBetreuerId(UUID betreuerId) {
+        List<Thema> result = new ArrayList<>();
+        for (var dto : dataRepository.findThemenByBetreuerId(betreuerId)) {
+            result.add(Mapper.toThema(dto));
+        }
+        return result;
+    }
+
+    @Override
+    public List<Thema> findThemenByBetreuerIdOrderByTitel(UUID betreuerId) {
+        List<Thema> result = new ArrayList<>();
+        for (var dto : dataRepository.findThemenByBetreuerIdOrderByTitel(betreuerId)) {
+            result.add(Mapper.toThema(dto));
+        }
+        return result;
+    }
+
+    @Override
+    public long countThemenByBetreuerId(UUID betreuerId) {
+        return dataRepository.countThemenByBetreuerId(betreuerId);
+    }
+
+    @Override
+    public boolean existsBetreuerThema(UUID betreuerId, UUID themaId) {
+        return dataRepository.existsBetreuerThema(betreuerId, themaId);
+    }
+
+    
 
 
 }

@@ -21,7 +21,7 @@ public class Mapper {
         Kontaktinformationen kontaktinformationen = toKontaktinformationen(
                 new KontaktinformationenDto(dto.email(), dto.matrikelnummer())
         );
-        return new Betreuer(
+        Betreuer betreuer = new Betreuer(
                 dto.id(),
                 dto.name(),
                 kontaktinformationen,
@@ -29,6 +29,8 @@ public class Mapper {
                 toInformationsdateien(dto.dateien()),
                 toLinks(dto.links())
         );
+        betreuer.getThemen().addAll(toThemen(dto.themen()));
+        return betreuer;
     }
 
     public static BetreuerDto toBetreuerDto(Betreuer betreuer) {
@@ -42,8 +44,31 @@ public class Mapper {
                 matrikelnummer,
                 toFachgebietDtos(betreuer.getFachgebiete()),
                 toInformationsdateiDtos(betreuer.getDateien()),
-                toLinkDtos(betreuer.getLinks())
+                toLinkDtos(betreuer.getLinks()),
+                toBetreuerThemaDtos(betreuer.getThemen())
         );
+    }
+
+    public static Set<Thema> toThemen(Set<BetreuerThemaDto> dtos) {
+        Set<Thema> result = new HashSet<>();
+        if (dtos == null) {
+            return result;
+        }
+        for (BetreuerThemaDto dto : dtos) {
+            result.add(new Thema(dto.themaId(), ""));
+        }
+        return result;
+    }
+
+    public static Set<BetreuerThemaDto> toBetreuerThemaDtos(Set<Thema> themen) {
+        Set<BetreuerThemaDto> result = new HashSet<>();
+        if (themen == null) {
+            return result;
+        }
+        for (Thema thema : themen) {
+            result.add(new BetreuerThemaDto(thema.getId()));
+        }
+        return result;
     }
 
     public static Set<Fachgebiet> toFachgebiete(Set<FachgebietDto> dtos) {
@@ -162,7 +187,8 @@ public class Mapper {
                 toThemaKurse(dto.voraussetzungen()),
                 toThemaFachgebiete(dto.fachgebiete()),
                 toThemaInformationsdateien(dto.dateien()),
-                toThemaLinks(dto.links())
+                toThemaLinks(dto.links()),
+                null
         );
     }
 

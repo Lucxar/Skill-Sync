@@ -2,6 +2,7 @@ package wiegand.luca.ThesisIsComing.ApplicationService;
 
 import org.springframework.stereotype.Service;
 import wiegand.luca.ThesisIsComing.ApplicationService.exception.ThemaNotFoundException;
+import wiegand.luca.ThesisIsComing.domainModel.Betreuer;
 import wiegand.luca.ThesisIsComing.domainModel.Thema;
 
 import java.util.List;
@@ -24,6 +25,27 @@ public class ThemaService {
 
     public Thema getById(UUID id) {
         return repository.findById(id).orElseThrow(() -> new ThemaNotFoundException(id));
+    }
+
+    public Thema save(Thema thema) {
+        return repository.save(thema);
+    }
+
+    public List<Betreuer> getBetreuerByThemaId(UUID themaId) {
+        Thema thema = getById(themaId);
+        return thema.getBetreuer().stream().toList();
+    }
+
+    public List<UUID> findBetreuerIdsByThemaId(UUID themaId) {
+        return repository.findBetreuerIdsByThemaId(themaId);
+    }
+
+    public List<Betreuer> findBetreuerByThemaId(UUID themaId) {
+        return repository.findBetreuerByThemaId(themaId);
+    }
+
+    public List<Betreuer> findBetreuerByThemaIdOrderByName(UUID themaId) {
+        return repository.findBetreuerByThemaIdOrderByName(themaId);
     }
 
 }

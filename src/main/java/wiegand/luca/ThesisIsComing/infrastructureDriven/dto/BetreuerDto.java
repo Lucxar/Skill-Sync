@@ -15,6 +15,7 @@ public record BetreuerDto(
         String matrikelnummer,
         @MappedCollection(idColumn = "betreuer_id") Set<FachgebietDto> fachgebiete,
         @MappedCollection(idColumn = "betreuer_id") Set<InformationsdateiDto> dateien,
-        @MappedCollection(idColumn = "betreuer_id") Set<LinkDto> links
+        @MappedCollection(idColumn = "betreuer_id") Set<LinkDto> links,
+        @MappedCollection(idColumn = "betreuer_id") Set<BetreuerThemaDto> themen
 ) {
 }

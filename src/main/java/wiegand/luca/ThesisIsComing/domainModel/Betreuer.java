@@ -17,6 +17,7 @@ public class Betreuer {
     private Set<Fachgebiet> fachgebiete;
     private Set<Informationsdatei> dateien;
     private Set<Link> links;
+    private Set<Thema> themen;
 
 
     public Betreuer (String name, Kontaktinformationen kontaktinformationen) {
@@ -26,6 +27,7 @@ public class Betreuer {
         this.fachgebiete = new HashSet<>();
         this.dateien = new HashSet<>();
         this.links = new HashSet<>();
+        this.themen = new HashSet<>();
     }
 
     public Betreuer(UUID id, String name) {
@@ -35,6 +37,7 @@ public class Betreuer {
         this.fachgebiete = new HashSet<>();
         this.dateien = new HashSet<>();
         this.links = new HashSet<>();
+        this.themen = new HashSet<>();
     }
 
     public Betreuer(UUID id, String name, Kontaktinformationen kontaktinformationen, Set<Fachgebiet> fachgebiete, Set<Informationsdatei> dateien, Set<Link> links) {
@@ -44,6 +47,7 @@ public class Betreuer {
         this.fachgebiete = fachgebiete != null ? fachgebiete : new HashSet<>();
         this.dateien = dateien != null ? dateien : new HashSet<>();
         this.links = links != null ? links : new HashSet<>();
+        this.themen = new HashSet<>();
     }
 
     public UUID getId() {
@@ -70,6 +74,14 @@ public class Betreuer {
         return links;
     }
 
+    public Set<Thema> getThemen() {
+        return themen;
+    }
+
+    public void assignThema(UUID themaId) {
+        Thema thema = new Thema(themaId, "");
+        this.themen.add(thema);
+    }
 
 
 }

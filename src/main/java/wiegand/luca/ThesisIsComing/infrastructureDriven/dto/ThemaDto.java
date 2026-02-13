@@ -15,7 +15,8 @@ public record ThemaDto(
         @MappedCollection(idColumn = "thema_id") Set<ThemaKursDto> voraussetzungen,
         @MappedCollection(idColumn = "thema_id") Set<ThemaFachgebietDto> fachgebiete,
         @MappedCollection(idColumn = "thema_id") Set<ThemaInformationsdateiDto> dateien,
-        @MappedCollection(idColumn = "thema_id") Set<ThemaLinkDto> links) {
+        @MappedCollection(idColumn = "thema_id") Set<ThemaLinkDto> links)
+{
 
 
 }
