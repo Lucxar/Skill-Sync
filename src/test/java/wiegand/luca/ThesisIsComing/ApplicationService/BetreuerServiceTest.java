@@ -35,14 +35,14 @@ class BetreuerServiceTest {
     void listAll_returns_all_betreuer() {
         UUID id1 = UUID.randomUUID();
         UUID id2 = UUID.randomUUID();
-        when(repo.findAll()).thenReturn(List.of(
-                new Betreuer(id1, "Anna"),
-                new Betreuer(id2, "Max")
-        ));
+        Betreuer b1 = new Betreuer(id1, "Anna");
+        Betreuer b2 = new Betreuer(id2, "Max");
+        when(repo.findAll()).thenReturn(List.of(b1, b2));
 
         List<Betreuer> result = service.listAll();
 
         assertThat(result).hasSize(2);
+        assertThat(result).containsExactlyInAnyOrder(b1, b2);
         verify(repo).findAll();
     }
 
