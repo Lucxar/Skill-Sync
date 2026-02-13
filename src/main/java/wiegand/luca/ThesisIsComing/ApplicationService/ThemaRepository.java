@@ -10,7 +10,6 @@ public interface ThemaRepository {
     Optional<Thema> findByTitel(String titel);
     Optional<Thema> findById(UUID id);
     Iterable<Thema> findAll();
-    void save(Thema thema);
-    void update(Thema thema);
+    Thema save(Thema thema);
 
 }

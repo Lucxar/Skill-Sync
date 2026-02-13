@@ -1,5 +1,6 @@
 package wiegand.luca.ThesisIsComing.infrastructureDriven;
 
+import org.springframework.data.jdbc.core.JdbcAggregateTemplate;
 import org.springframework.stereotype.Repository;
 import wiegand.luca.ThesisIsComing.ApplicationService.ThemaRepository;
 import wiegand.luca.ThesisIsComing.domainModel.Thema;
@@ -14,9 +15,12 @@ import java.util.UUID;
 public class ThemaRepositoryImplementation implements ThemaRepository {
 
     private final ThemaDataRepository repository;
+    private final JdbcAggregateTemplate jdbcAggregateTemplate;
 
-    public ThemaRepositoryImplementation(ThemaDataRepository repository) {
+    public ThemaRepositoryImplementation(ThemaDataRepository repository,
+                                         JdbcAggregateTemplate jdbcAggregateTemplate) {
         this.repository = repository;
+        this.jdbcAggregateTemplate = jdbcAggregateTemplate;
     }
 
     @Override
@@ -39,12 +43,13 @@ public class ThemaRepositoryImplementation implements ThemaRepository {
     }
 
     @Override
-    public void save(Thema thema) {
-        repository.save(Mapper.toThemaDto(thema));
+    public Thema save(Thema thema) {
+        ThemaDto dto = Mapper.toThemaDto(thema);
+        ThemaDto saved = (dto.id() != null && repository.existsById(dto.id()))
+                ? jdbcAggregateTemplate.update(dto)
+                : jdbcAggregateTemplate.insert(dto);
+        return Mapper.toThema(saved);
     }
 
-    @Override
-    public void update(Thema thema) {
-        repository.save(Mapper.toThemaDto(thema));
-    }
+
 }
