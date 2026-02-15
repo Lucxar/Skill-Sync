@@ -83,6 +83,14 @@ public class Betreuer {
         return githubLogin;
     }
 
+    public void assignGithubLogin(String githubLogin) {
+        this.githubLogin = normalizeGithubLogin(githubLogin);
+    }
+
+    public void removeGithubLogin() {
+        this.githubLogin = null;
+    }
+
     public Kontaktinformationen getKontaktinformationen() {
         return kontaktinformationen;
     }
@@ -161,6 +169,13 @@ public class Betreuer {
             throw new IllegalArgumentException("Name darf nicht leer sein");
         }
         return name.trim();
+    }
+
+    private static String normalizeGithubLogin(String login) {
+        if (login == null || login.trim().isEmpty()) {
+            throw new IllegalArgumentException("GitHub-Login darf nicht leer sein");
+        }
+        return login.trim();
     }
 
     private static Kontaktinformationen normalizeKontaktinformationen(Kontaktinformationen kontaktinformationen) {

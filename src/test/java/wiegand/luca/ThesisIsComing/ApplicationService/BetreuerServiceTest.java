@@ -7,6 +7,7 @@ import org.mockito.Mock;
 import org.mockito.ArgumentCaptor;
 import org.mockito.junit.jupiter.MockitoExtension;
 import wiegand.luca.ThesisIsComing.ApplicationService.exception.BetreuerNotFoundException;
+import wiegand.luca.ThesisIsComing.ApplicationService.exception.BetreuerRoleAssignmentException;
 import wiegand.luca.ThesisIsComing.ApplicationService.exception.BetreuerValidationException;
 import wiegand.luca.ThesisIsComing.ApplicationService.exception.DateiValidationException;
 import wiegand.luca.ThesisIsComing.ApplicationService.security.CurrentUser;
@@ -205,6 +206,45 @@ class BetreuerServiceTest {
         service.deleteBetreuer(id);
 
         verify(repo).deleteById(id);
+    }
+
+    @Test
+    void assignBetreuerRole_sets_github_login() {
+        UUID id = UUID.randomUUID();
+        Betreuer betreuer = new Betreuer(id, "Anna");
+        when(repo.findById(id)).thenReturn(Optional.of(betreuer));
+        when(repo.findByGithubLogin("anna-gh")).thenReturn(Optional.empty());
+        when(repo.save(any(Betreuer.class))).thenAnswer(invocation -> invocation.getArgument(0));
+
+        Betreuer updated = service.assignBetreuerRole(id, "anna-gh");
+
+        assertThat(updated.getGithubLogin()).isEqualTo("anna-gh");
+        verify(repo).save(any(Betreuer.class));
+    }
+
+    @Test
+    void assignBetreuerRole_throws_when_login_taken() {
+        UUID id = UUID.randomUUID();
+        UUID otherId = UUID.randomUUID();
+        Betreuer betreuer = new Betreuer(id, "Anna");
+        Betreuer other = new Betreuer(otherId, "Max");
+        when(repo.findById(id)).thenReturn(Optional.of(betreuer));
+        when(repo.findByGithubLogin("taken")).thenReturn(Optional.of(other));
+
+        assertThatThrownBy(() -> service.assignBetreuerRole(id, "taken"))
+                .isInstanceOf(BetreuerRoleAssignmentException.class);
+        verify(repo, never()).save(any(Betreuer.class));
+    }
+
+    @Test
+    void removeBetreuerRole_throws_when_no_login() {
+        UUID id = UUID.randomUUID();
+        Betreuer betreuer = new Betreuer(id, "Anna");
+        when(repo.findById(id)).thenReturn(Optional.of(betreuer));
+
+        assertThatThrownBy(() -> service.removeBetreuerRole(id))
+                .isInstanceOf(BetreuerRoleAssignmentException.class);
+        verify(repo, never()).save(any(Betreuer.class));
     }
 
     @Test

@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="de" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Rollenverwaltung</title>
+</head>
+<body>
+<main>
+    <section>
+        <h1>Rollenverwaltung</h1>
+        <p>GitHub-Logins zuweisen oder entziehen.</p>
+        <table>
+            <thead>
+            <tr>
+                <th>Betreuer</th>
+                <th>GitHub-Login</th>
+                <th>Rolle zuweisen</th>
+                <th>Rolle entziehen</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr th:each="b : ${betreuer}">
+                <td th:text="${b.name}">Name</td>
+                <td th:text="${b.githubLogin != null ? b.githubLogin : '-'}">-</td>
+                <td>
+                    <form th:action="@{/admin/rollen/zuweisen}" method="post" th:object="${assignForm}">
+                        <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+                        <input type="hidden" name="betreuerId" th:value="${b.id}" />
+                        <label>
+                            <span>GitHub-Login</span>
+                            <input type="text" th:field="*{githubLogin}" placeholder="github-login" />
+                        </label>
+                        <button type="submit">Zuweisen</button>
+                        <div th:if="${#fields.hasErrors('githubLogin')}" th:errors="*{githubLogin}">Fehler</div>
+                    </form>
+                </td>
+                <td>
+                    <form th:action="@{/admin/rollen/entziehen}" method="post" th:object="${removeForm}">
+                        <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+                        <input type="hidden" name="betreuerId" th:value="${b.id}" />
+                        <button type="submit"
+                                th:disabled="${b.githubLogin == null || #strings.isEmpty(b.githubLogin)}">Entziehen</button>
+                        <div th:if="${#fields.hasErrors('betreuerId')}" th:errors="*{betreuerId}">Fehler</div>
+                    </form>
+                </td>
+            </tr>
+            </tbody>
+        </table>
+        <p th:if="${betreuer == null || #lists.isEmpty(betreuer)}">Keine Betreuer vorhanden</p>
+    </section>
+</main>
+</body>
+</html>

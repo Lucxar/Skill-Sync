@@ -296,6 +296,23 @@ class BetreuerRepositoryImplementationTest extends TestPostgresContainer {
     }
 
     @Test
+    @DisplayName("save persists github_login for Betreuer")
+    void save_persists_github_login() {
+        UUID id = UUID.randomUUID();
+        Betreuer betreuer = new Betreuer(id, "Anna");
+        betreuer.assignGithubLogin("anna-gh");
+
+        betreuerRepository.save(betreuer);
+
+        String login = jdbcTemplate.queryForObject(
+                "select github_login from betreuer where id = ?",
+                String.class,
+                id
+        );
+        assertThat(login).isEqualTo("anna-gh");
+    }
+
+    @Test
     @DisplayName("betreuer_thema enforces foreign keys")
     void betreuer_thema_enforces_foreign_keys() {
         assertThatThrownBy(() -> jdbcTemplate.update(

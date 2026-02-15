@@ -20,6 +20,9 @@
         <div sec:authorize="hasAnyRole('ADMIN','BETREUER')">
             <a th:href="@{/betreuer/neu}">Neuen Betreuer anlegen</a>
         </div>
+        <div sec:authorize="hasRole('ADMIN')">
+            <a th:href="@{/admin/rollen}">Rollen verwalten</a>
+        </div>
         <ul>
             <li th:each="b : ${betreuer}">
                 <a th:href="@{/betreuer/{id}(id=${b.id})}" th:text="${b.name}">Betreuer</a>

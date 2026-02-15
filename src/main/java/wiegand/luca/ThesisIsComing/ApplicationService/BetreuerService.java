@@ -2,6 +2,7 @@ package wiegand.luca.ThesisIsComing.ApplicationService;
 
 import org.springframework.stereotype.Service;
 import wiegand.luca.ThesisIsComing.ApplicationService.exception.BetreuerNotFoundException;
+import wiegand.luca.ThesisIsComing.ApplicationService.exception.BetreuerRoleAssignmentException;
 import wiegand.luca.ThesisIsComing.ApplicationService.exception.BetreuerValidationException;
 import wiegand.luca.ThesisIsComing.ApplicationService.exception.DateiNotFoundException;
 import wiegand.luca.ThesisIsComing.ApplicationService.exception.DateiValidationException;
@@ -99,7 +100,39 @@ public class BetreuerService {
     }
 
     public java.util.Optional<Betreuer> findByGithubLogin(String githubLogin) {
-        return betreuerRepository.findByGithubLogin(githubLogin);
+        String normalized = normalizeGithubLogin(githubLogin);
+        if (normalized == null) {
+            return java.util.Optional.empty();
+        }
+        return betreuerRepository.findByGithubLogin(normalized);
+    }
+
+    public Betreuer assignBetreuerRole(UUID betreuerId, String githubLogin) {
+        String normalized = normalizeGithubLogin(githubLogin);
+        if (normalized == null) {
+            throw new BetreuerRoleAssignmentException("GitHub-Login darf nicht leer sein");
+        }
+        Betreuer betreuer = getById(betreuerId);
+        betreuerRepository.findByGithubLogin(normalized)
+                .filter(existing -> !existing.getId().equals(betreuerId))
+                .ifPresent(existing -> {
+                    throw new BetreuerRoleAssignmentException("GitHub-Login ist bereits vergeben");
+                });
+        try {
+            betreuer.assignGithubLogin(normalized);
+        } catch (IllegalArgumentException ex) {
+            throw new BetreuerRoleAssignmentException(ex.getMessage());
+        }
+        return betreuerRepository.save(betreuer);
+    }
+
+    public Betreuer removeBetreuerRole(UUID betreuerId) {
+        Betreuer betreuer = getById(betreuerId);
+        if (betreuer.getGithubLogin() == null || betreuer.getGithubLogin().isBlank()) {
+            throw new BetreuerRoleAssignmentException("Betreuer hat keine GitHub-Zuordnung");
+        }
+        betreuer.removeGithubLogin();
+        return betreuerRepository.save(betreuer);
     }
 
     public List<Thema> listThemenByBetreuer(UUID betreuerId) {
@@ -213,6 +246,14 @@ public class BetreuerService {
     private String resolveUploaderName() {
         String login = currentUser.login();
         return (login == null || login.isBlank()) ? "unbekannt" : login;
+    }
+
+    private static String normalizeGithubLogin(String githubLogin) {
+        if (githubLogin == null) {
+            return null;
+        }
+        String trimmed = githubLogin.trim();
+        return trimmed.isEmpty() ? null : trimmed;
     }
 
 
