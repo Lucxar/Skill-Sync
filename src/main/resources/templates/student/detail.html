@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="de" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Studierendendetail</title>
+</head>
+<body>
+<main>
+    <section>
+        <h1 th:text="${student.name}">Studierende</h1>
+
+        <div sec:authorize="hasAnyRole('ADMIN','STUDIERENDE')">
+            <a th:href="@{'/studierende/' + ${student.id} + '/bearbeiten'}">Profil bearbeiten</a>
+            <form th:action="@{'/studierende/' + ${student.id} + '/loeschen'}" method="post">
+                <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+                <button type="submit">Profil loeschen</button>
+            </form>
+        </div>
+
+        <div>
+            <h2>Kontakt</h2>
+            <p th:if="${student.kontaktinformationen != null}">
+                <span th:text="${student.kontaktinformationen.email}">email</span>
+            </p>
+            <p th:if="${student.kontaktinformationen != null}">
+                <span th:text="${student.kontaktinformationen.matrikelnummer}">matrikel</span>
+            </p>
+            <p th:if="${student.kontaktinformationen == null}">Keine Kontaktinformationen</p>
+        </div>
+
+        <div>
+            <h2>Besuchte Veranstaltungen</h2>
+            <ul>
+                <li th:each="k : ${student.bestandeneKurse}" th:text="${k.kursbezeichnung}">Kurs</li>
+            </ul>
+            <p th:if="${student.bestandeneKurse == null || #lists.isEmpty(student.bestandeneKurse)}">Keine Kurse eingetragen</p>
+        </div>
+
+        <div>
+            <h2>Interessensgebiete</h2>
+            <ul>
+                <li th:each="i : ${student.interessensgebiete}" th:text="${i.bezeichnung}">Fachgebiet</li>
+            </ul>
+            <p th:if="${student.interessensgebiete == null || #lists.isEmpty(student.interessensgebiete)}">Keine Interessen eingetragen</p>
+        </div>
+
+        <a th:href="@{/studierende}">Zurueck zur Liste</a>
+    </section>
+</main>
+</body>
+</html>

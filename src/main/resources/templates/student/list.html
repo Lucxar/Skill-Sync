@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="de" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Studierendenliste</title>
+</head>
+<body>
+<main>
+    <section>
+        <h1>Studierendenliste</h1>
+        <div sec:authorize="hasAnyRole('ADMIN','STUDIERENDE')">
+            <a th:href="@{/studierende/neu}">Neues Studierendenprofil anlegen</a>
+        </div>
+        <ul>
+            <li th:each="s : ${students}">
+                <a th:href="@{/studierende/{id}(id=${s.id})}" th:text="${s.name}">Studierende</a>
+            </li>
+        </ul>
+        <p th:if="${students == null || #lists.isEmpty(students)}">Keine Studierenden vorhanden</p>
+    </section>
+</main>
+</body>
+</html>

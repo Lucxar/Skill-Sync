@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="de" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title th:text="${pageTitle}">Studierende</title>
+</head>
+<body>
+<main>
+    <section>
+        <h1 th:text="${pageTitle}">Studierende</h1>
+        <form th:action="${formAction}" th:object="${studentForm}" method="post">
+            <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+            <div>
+                <label for="name">Name</label>
+                <input type="text" id="name" th:field="*{name}" required />
+                <p th:if="${#fields.hasErrors('name')}" th:errors="*{name}">Fehler</p>
+            </div>
+            <div>
+                <label for="email">E-Mail (optional)</label>
+                <input type="email" id="email" th:field="*{email}" />
+            </div>
+            <div>
+                <label for="matrikelnummer">Matrikelnummer (optional)</label>
+                <input type="text" id="matrikelnummer" th:field="*{matrikelnummer}" />
+            </div>
+            <div>
+                <label for="bestandeneKurse">Besuchte Veranstaltungen (eine pro Zeile oder mit Komma)</label>
+                <textarea id="bestandeneKurse" th:field="*{bestandeneKurse}" rows="5"></textarea>
+            </div>
+            <div>
+                <label for="interessensgebiete">Interessensgebiete (eine pro Zeile oder mit Komma)</label>
+                <textarea id="interessensgebiete" th:field="*{interessensgebiete}" rows="4"></textarea>
+            </div>
+            <button type="submit" th:text="${submitLabel}">Speichern</button>
+        </form>
+        <a th:href="@{/studierende}">Zurueck zur Liste</a>
+    </section>
+</main>
+</body>
+</html>

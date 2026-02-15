@@ -1,8 +1,10 @@
 package wiegand.luca.ThesisIsComing.infrastructureDriven;
 
 import wiegand.luca.ThesisIsComing.domainModel.Betreuer;
+import wiegand.luca.ThesisIsComing.domainModel.Student;
 import wiegand.luca.ThesisIsComing.domainModel.Thema;
 import wiegand.luca.ThesisIsComing.domainModel.valueObjects.BestandenerKurs;
+import wiegand.luca.ThesisIsComing.domainModel.valueObjects.Dateityp;
 import wiegand.luca.ThesisIsComing.domainModel.valueObjects.Fachgebiet;
 import wiegand.luca.ThesisIsComing.domainModel.valueObjects.Informationsdatei;
 import wiegand.luca.ThesisIsComing.domainModel.valueObjects.Kontaktinformationen;
@@ -48,6 +50,33 @@ public class Mapper {
                 toInformationsdateiDtos(betreuer.getDateien()),
                 toLinkDtos(betreuer.getLinks()),
                 toBetreuerThemaDtos(betreuer.getThemen())
+        );
+    }
+
+    public static Student toStudent(StudentDto dto) {
+        Kontaktinformationen kontaktinformationen = toKontaktinformationen(
+                new KontaktinformationenDto(dto.email(), dto.matrikelnummer())
+        );
+        return new Student(
+                dto.id(),
+                dto.name(),
+                kontaktinformationen,
+                toStudentBestandeneKurse(dto.bestandeneKurse()),
+                toStudentFachgebiete(dto.interessensgebiete())
+        );
+    }
+
+    public static StudentDto toStudentDto(Student student) {
+        KontaktinformationenDto kontaktinformationen = toKontaktinformationenDto(student.getKontaktinformationen());
+        String email = kontaktinformationen != null ? kontaktinformationen.email() : null;
+        String matrikelnummer = kontaktinformationen != null ? kontaktinformationen.matrikelnummer() : null;
+        return new StudentDto(
+                student.getId(),
+                student.getName(),
+                email,
+                matrikelnummer,
+                toStudentBestandenerKursDtos(student.getBestandeneKurse()),
+                toStudentFachgebietDtos(student.getInteressensgebiete())
         );
     }
 
@@ -106,6 +135,61 @@ public class Mapper {
         return result;
     }
 
+    public static Set<BestandenerKurs> toStudentBestandeneKurse(Set<StudentBestandenerKursDto> dtos) {
+        Set<BestandenerKurs> result = new HashSet<>();
+        if (dtos == null) {
+            return result;
+        }
+        for (StudentBestandenerKursDto dto : dtos) {
+            Fachgebiet fachgebiet = dto.fachgebietBezeichnung() != null
+                    ? new Fachgebiet(dto.fachgebietBezeichnung())
+                    : null;
+            result.add(new BestandenerKurs(dto.kursbezeichnung(), dto.bestandenAm(), fachgebiet));
+        }
+        return result;
+    }
+
+    public static Set<StudentBestandenerKursDto> toStudentBestandenerKursDtos(Set<BestandenerKurs> kurse) {
+        Set<StudentBestandenerKursDto> result = new HashSet<>();
+        if (kurse == null) {
+            return result;
+        }
+        for (BestandenerKurs kurs : kurse) {
+            String fachgebietBezeichnung = kurs.getFachgebietDesKurses() != null
+                    ? kurs.getFachgebietDesKurses().getBezeichnung()
+                    : null;
+            result.add(new StudentBestandenerKursDto(
+                    null,
+                    kurs.getKursbezeichnung(),
+                    kurs.getBestandenAm(),
+                    fachgebietBezeichnung
+            ));
+        }
+        return result;
+    }
+
+    public static Set<Fachgebiet> toStudentFachgebiete(Set<StudentFachgebietDto> dtos) {
+        Set<Fachgebiet> result = new HashSet<>();
+        if (dtos == null) {
+            return result;
+        }
+        for (StudentFachgebietDto dto : dtos) {
+            result.add(new Fachgebiet(dto.bezeichnung()));
+        }
+        return result;
+    }
+
+    public static Set<StudentFachgebietDto> toStudentFachgebietDtos(Set<Fachgebiet> fachgebiete) {
+        Set<StudentFachgebietDto> result = new HashSet<>();
+        if (fachgebiete == null) {
+            return result;
+        }
+        for (Fachgebiet fachgebiet : fachgebiete) {
+            result.add(new StudentFachgebietDto(null, fachgebiet.getBezeichnung()));
+        }
+        return result;
+    }
+
     public static Set<InformationsdateiDto> toInformationsdateiDtos(Set<Informationsdatei> dateien) {
         Set<InformationsdateiDto> result = new HashSet<>();
         if (dateien == null) {
@@ -143,12 +227,18 @@ public class Mapper {
         if (dto == null) {
             return null;
         }
+        Dateityp dateityp = dto.dateityp() != null
+                ? dto.dateityp()
+                : Dateityp.fromDateiname(dto.dateisystemPfad());
         return new Informationsdatei(
                 dto.titel(),
                 dto.beschreibung(),
                 dto.uploaderName(),
                 dto.uploadDatum(),
-                dto.dateisystemPfad()
+                dto.dateisystemPfad(),
+                dateityp,
+                dto.originalDateiname(),
+                dto.groesseInBytes()
         );
     }
 
@@ -162,7 +252,10 @@ public class Mapper {
                 datei.getBeschreibung(),
                 datei.getUploaderName(),
                 datei.getUploadDatum(),
-                datei.getDateisystemPfad()
+                datei.getDateisystemPfad(),
+                datei.getDateityp(),
+                datei.getOriginalDateiname(),
+                datei.getGroesseInBytes()
         );
     }
 
