@@ -13,6 +13,7 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.TestPropertySource;
 import wiegand.luca.ThesisIsComing.ApplicationService.ThemaRepository;
 import wiegand.luca.ThesisIsComing.TestPostgresContainer;
+import wiegand.luca.ThesisIsComing.domainModel.Betreuer;
 import wiegand.luca.ThesisIsComing.domainModel.Thema;
 
 import java.util.List;
@@ -110,10 +111,48 @@ public class ThemaRepositoryImplementationTest extends TestPostgresContainer {
         assertThat(result).hasSize(2);
     }
 
+    @Test
+    @DisplayName("relation queries return Betreuer for a Thema")
+    void relation_queries_return_betreuer_for_thema() {
+        UUID themaId = UUID.randomUUID();
+        UUID betreuerId1 = UUID.randomUUID();
+        UUID betreuerId2 = UUID.randomUUID();
+
+        jdbcTemplate.update(
+                "insert into thema (id, titel, beschreibung_markdown) values (?, ?, ?)",
+                themaId, "Thema X", null
+        );
+        jdbcTemplate.update(
+                "insert into betreuer (id, name, email, matrikelnummer) values (?, ?, ?, ?)",
+                betreuerId1, "Anna", null, null
+        );
+        jdbcTemplate.update(
+                "insert into betreuer (id, name, email, matrikelnummer) values (?, ?, ?, ?)",
+                betreuerId2, "Bernd", null, null
+        );
+        jdbcTemplate.update(
+                "insert into betreuer_thema (betreuer_id, thema_id) values (?, ?)",
+                betreuerId1, themaId
+        );
+        jdbcTemplate.update(
+                "insert into betreuer_thema (betreuer_id, thema_id) values (?, ?)",
+                betreuerId2, themaId
+        );
+
+        assertThat(themaRepository.findBetreuerIdsByThemaId(themaId))
+                .containsExactlyInAnyOrder(betreuerId1, betreuerId2);
+
+        assertThat(themaRepository.findBetreuerByThemaIdOrderByName(themaId))
+                .extracting(Betreuer::getName)
+                .containsExactly("Anna", "Bernd");
+    }
+
 
 
     @BeforeEach
     public void clearThemaTables() {
+        jdbcTemplate.update("delete from betreuer_thema");
+        jdbcTemplate.update("delete from betreuer");
         jdbcTemplate.update("delete from thema_link");
         jdbcTemplate.update("delete from thema_informationsdatei");
         jdbcTemplate.update("delete from thema_fachgebiet");
