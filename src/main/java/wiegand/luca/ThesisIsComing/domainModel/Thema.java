@@ -28,8 +28,8 @@ public class Thema {
 
     public Thema(UUID id, String titel) {
         this.id = id;
-        this.titel = titel;
-        this.beschreibungMarkdown = null;
+        setTitel(titel);
+        setBeschreibungMarkdown(null);
         this.voraussetzungen = new HashSet<>();
         this.fachgebiete = new HashSet<>();
         this.dateien = new HashSet<>();
@@ -40,8 +40,8 @@ public class Thema {
     public Thema(UUID id, String titel, String beschreibung, Set<Kurs> voraussetzungen,
                  Set<Fachgebiet> fachgebiete, Set<Informationsdatei> dateien, Set<Link> links, Set<Betreuer> betreuer) {
         this.id = id;
-        this.titel = titel;
-        this.beschreibungMarkdown = beschreibung;
+        setTitel(titel);
+        setBeschreibungMarkdown(beschreibung);
         this.voraussetzungen = voraussetzungen != null ? voraussetzungen : new HashSet<>();
         this.fachgebiete = fachgebiete != null ? fachgebiete : new HashSet<>();
         this.dateien = dateien != null ? dateien : new HashSet<>();
@@ -62,7 +62,7 @@ public class Thema {
     }
 
     public void setTitel(String titel) {
-        this.titel = titel;
+        this.titel = normalizeTitel(titel);
     }
 
     public String getBeschreibungMarkdown() {
@@ -70,7 +70,12 @@ public class Thema {
     }
 
     public void setBeschreibungMarkdown(String beschreibungMarkdown) {
-        this.beschreibungMarkdown = beschreibungMarkdown;
+        this.beschreibungMarkdown = normalizeBeschreibung(beschreibungMarkdown);
+    }
+
+    public void updateDetails(String titel, String beschreibungMarkdown) {
+        setTitel(titel);
+        setBeschreibungMarkdown(beschreibungMarkdown);
     }
 
     public Set<Kurs> getVoraussetzungen() {
@@ -134,6 +139,21 @@ public class Thema {
     public void assignBetreuer(UUID betreuerId) {
         Betreuer betreuer = new Betreuer(betreuerId, "");
         this.betreuer.add(betreuer);
+    }
+
+    private static String normalizeTitel(String titel) {
+        if (titel == null || titel.trim().isEmpty()) {
+            throw new IllegalArgumentException("Titel darf nicht leer sein");
+        }
+        return titel.trim();
+    }
+
+    private static String normalizeBeschreibung(String beschreibungMarkdown) {
+        if (beschreibungMarkdown == null) {
+            return null;
+        }
+        String trimmed = beschreibungMarkdown.trim();
+        return trimmed.isEmpty() ? null : trimmed;
     }
 
     @Override
