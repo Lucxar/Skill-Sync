@@ -24,6 +24,7 @@ public class Mapper {
         Betreuer betreuer = new Betreuer(
                 dto.id(),
                 dto.name(),
+                dto.githubLogin(),
                 kontaktinformationen,
                 toFachgebiete(dto.fachgebiete()),
                 toInformationsdateien(dto.dateien()),
@@ -42,6 +43,7 @@ public class Mapper {
                 betreuer.getName(),
                 email,
                 matrikelnummer,
+                betreuer.getGithubLogin(),
                 toFachgebietDtos(betreuer.getFachgebiete()),
                 toInformationsdateiDtos(betreuer.getDateien()),
                 toLinkDtos(betreuer.getLinks()),
