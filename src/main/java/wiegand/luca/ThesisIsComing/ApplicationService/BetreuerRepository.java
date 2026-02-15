@@ -11,6 +11,7 @@ public interface BetreuerRepository {
     Optional<Betreuer> findById(UUID id);
     Iterable<Betreuer> findAll();
     Betreuer save(Betreuer betreuer);
+    Optional<Betreuer> findByGithubLogin(String githubLogin);
 
     List<UUID> findThemaIdsByBetreuerId(UUID betreuerId);
     List<Thema> findThemenByBetreuerId(UUID betreuerId);

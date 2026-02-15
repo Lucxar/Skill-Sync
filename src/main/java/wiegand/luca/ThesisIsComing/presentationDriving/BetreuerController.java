@@ -5,7 +5,12 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.servlet.view.RedirectView;
+import org.springframework.security.access.prepost.PreAuthorize;
 import wiegand.luca.ThesisIsComing.ApplicationService.BetreuerService;
+import wiegand.luca.ThesisIsComing.ApplicationService.BetreuerThemenBeziehungService;
+import wiegand.luca.ThesisIsComing.ApplicationService.ThemaService;
 import wiegand.luca.ThesisIsComing.domainModel.Betreuer;
 import wiegand.luca.ThesisIsComing.presentationDriving.exception.BetreuerListIsEmpty;
 
@@ -15,9 +20,15 @@ import java.util.UUID;
 public class BetreuerController {
 
     private final BetreuerService service;
+    private final BetreuerThemenBeziehungService beziehungService;
+    private final ThemaService themaService;
 
-    public BetreuerController(BetreuerService service) {
+    public BetreuerController(BetreuerService service,
+                              BetreuerThemenBeziehungService beziehungService,
+                              ThemaService themaService) {
         this.service = service;
+        this.beziehungService = beziehungService;
+        this.themaService = themaService;
     }
 
 
@@ -43,7 +54,16 @@ public class BetreuerController {
     public String getBetreuerById(@PathVariable UUID id, Model model) {
         Betreuer betreuer = service.getById(id);
         model.addAttribute("betreuer", betreuer);
+        model.addAttribute("themen", service.findThemenByBetreuerIdOrderByTitel(id));
+        model.addAttribute("allThemen", themaService.listAll());
         return "betreuer/detail";
+    }
+
+    @PostMapping("/betreuer/{id}/themen")
+    @PreAuthorize("hasAnyRole('ADMIN','BETREUER')")
+    public RedirectView assignThema(@PathVariable UUID id, @RequestParam UUID themaId) {
+        beziehungService.assignThemaToBetreuer(id, themaId);
+        return new RedirectView("/betreuer/" + id);
     }
 
 

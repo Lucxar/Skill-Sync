@@ -50,6 +50,11 @@ public class BetreuerRepositoryImplementation implements BetreuerRepository {
     }
 
     @Override
+    public Optional<Betreuer> findByGithubLogin(String githubLogin) {
+        return dataRepository.findByGithubLogin(githubLogin).map(Mapper::toBetreuer);
+    }
+
+    @Override
     public List<UUID> findThemaIdsByBetreuerId(UUID betreuerId) {
         return dataRepository.findThemaIdsByBetreuerId(betreuerId);
     }

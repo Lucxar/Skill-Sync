@@ -16,6 +16,9 @@ public interface BetreuerDataRepository extends CrudRepository<BetreuerDto, UUID
     @Query("SELECT bt.thema_id FROM betreuer_thema bt WHERE bt.betreuer_id = :betreuerId")
     List<UUID> findThemaIdsByBetreuerId(@Param("betreuerId") UUID betreuerId);
 
+    @Query("SELECT * FROM betreuer WHERE github_login = :githubLogin")
+    java.util.Optional<BetreuerDto> findByGithubLogin(@Param("githubLogin") String githubLogin);
+
 
     @Query("SELECT t.* FROM thema t JOIN betreuer_thema bt ON bt.thema_id = t.id WHERE bt.betreuer_id = :betreuerId")
     List<ThemaDto> findThemenByBetreuerId(@Param("betreuerId") UUID betreuerId);

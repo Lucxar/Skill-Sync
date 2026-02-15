@@ -13,6 +13,7 @@ public record BetreuerDto(
         String name,
         String email,
         String matrikelnummer,
+        String githubLogin,
         @MappedCollection(idColumn = "betreuer_id") Set<FachgebietDto> fachgebiete,
         @MappedCollection(idColumn = "betreuer_id") Set<InformationsdateiDto> dateien,
         @MappedCollection(idColumn = "betreuer_id") Set<LinkDto> links,
