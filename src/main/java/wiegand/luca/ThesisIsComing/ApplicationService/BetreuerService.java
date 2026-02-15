@@ -1,10 +1,11 @@
 package wiegand.luca.ThesisIsComing.ApplicationService;
 
-import org.springframework.stereotype.Repository;
 import org.springframework.stereotype.Service;
+import wiegand.luca.ThesisIsComing.ApplicationService.exception.BetreuerValidationException;
 import wiegand.luca.ThesisIsComing.ApplicationService.exception.BetreuerNotFoundException;
 import wiegand.luca.ThesisIsComing.domainModel.Betreuer;
 import wiegand.luca.ThesisIsComing.domainModel.Thema;
+import wiegand.luca.ThesisIsComing.domainModel.valueObjects.Kontaktinformationen;
 import wiegand.luca.ThesisIsComing.domainModel.valueObjects.Link;
 
 import java.util.List;
@@ -34,6 +35,31 @@ public class BetreuerService {
 
     public Betreuer save(Betreuer betreuer) {
         return betreuerRepository.save(betreuer);
+    }
+
+    public Betreuer createBetreuer(String name, String email, String matrikelnummer) {
+        try {
+            Kontaktinformationen kontaktinformationen = new Kontaktinformationen(email, matrikelnummer);
+            Betreuer betreuer = new Betreuer(name, kontaktinformationen);
+            return betreuerRepository.save(betreuer);
+        } catch (IllegalArgumentException ex) {
+            throw new BetreuerValidationException(ex.getMessage());
+        }
+    }
+
+    public Betreuer updateBetreuer(UUID id, String name, String email, String matrikelnummer) {
+        Betreuer betreuer = getById(id);
+        try {
+            betreuer.updateDetails(name, email, matrikelnummer);
+            return betreuerRepository.save(betreuer);
+        } catch (IllegalArgumentException ex) {
+            throw new BetreuerValidationException(ex.getMessage());
+        }
+    }
+
+    public void deleteBetreuer(UUID id) {
+        getById(id);
+        betreuerRepository.deleteById(id);
     }
 
     public java.util.Optional<Betreuer> findByGithubLogin(String githubLogin) {

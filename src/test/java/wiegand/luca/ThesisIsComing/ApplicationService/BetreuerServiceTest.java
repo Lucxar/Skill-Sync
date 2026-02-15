@@ -7,6 +7,7 @@ import org.mockito.Mock;
 import org.mockito.ArgumentCaptor;
 import org.mockito.junit.jupiter.MockitoExtension;
 import wiegand.luca.ThesisIsComing.ApplicationService.exception.BetreuerNotFoundException;
+import wiegand.luca.ThesisIsComing.ApplicationService.exception.BetreuerValidationException;
 import wiegand.luca.ThesisIsComing.domainModel.Betreuer;
 import wiegand.luca.ThesisIsComing.domainModel.exception.InvalidLinkException;
 import wiegand.luca.ThesisIsComing.domainModel.valueObjects.Link;
@@ -21,6 +22,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.never;
 
 @ExtendWith(MockitoExtension.class)
 class BetreuerServiceTest {
@@ -97,5 +99,57 @@ class BetreuerServiceTest {
 
         assertThatThrownBy(() -> service.addLink(id, " ", ""))
                 .isInstanceOf(InvalidLinkException.class);
+    }
+
+    @Test
+    void createBetreuer_saves_and_returns_created_betreuer() {
+        when(repo.save(any(Betreuer.class))).thenAnswer(invocation -> invocation.getArgument(0));
+
+        Betreuer created = service.createBetreuer("Anna", "anna@uni.de", "M-1");
+
+        ArgumentCaptor<Betreuer> captor = ArgumentCaptor.forClass(Betreuer.class);
+        verify(repo).save(captor.capture());
+        assertThat(captor.getValue().getName()).isEqualTo("Anna");
+        assertThat(created.getName()).isEqualTo("Anna");
+    }
+
+    @Test
+    void createBetreuer_throws_when_name_blank() {
+        assertThatThrownBy(() -> service.createBetreuer(" ", null, null))
+                .isInstanceOf(BetreuerValidationException.class);
+        verify(repo, never()).save(any(Betreuer.class));
+    }
+
+    @Test
+    void updateBetreuer_updates_details() {
+        UUID id = UUID.randomUUID();
+        Betreuer betreuer = new Betreuer(id, "Alt");
+        when(repo.findById(id)).thenReturn(Optional.of(betreuer));
+        when(repo.save(any(Betreuer.class))).thenAnswer(invocation -> invocation.getArgument(0));
+
+        Betreuer updated = service.updateBetreuer(id, "Neu", "neu@uni.de", "M-2");
+
+        assertThat(updated.getName()).isEqualTo("Neu");
+        assertThat(updated.getKontaktinformationen().getEmail()).isEqualTo("neu@uni.de");
+    }
+
+    @Test
+    void updateBetreuer_throws_when_name_blank() {
+        UUID id = UUID.randomUUID();
+        when(repo.findById(id)).thenReturn(Optional.of(new Betreuer(id, "Alt")));
+
+        assertThatThrownBy(() -> service.updateBetreuer(id, " ", null, null))
+                .isInstanceOf(BetreuerValidationException.class);
+        verify(repo, never()).save(any(Betreuer.class));
+    }
+
+    @Test
+    void deleteBetreuer_deletes_when_found() {
+        UUID id = UUID.randomUUID();
+        when(repo.findById(id)).thenReturn(Optional.of(new Betreuer(id, "Anna")));
+
+        service.deleteBetreuer(id);
+
+        verify(repo).deleteById(id);
     }
 }

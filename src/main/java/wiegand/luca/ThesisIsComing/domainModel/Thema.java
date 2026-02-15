@@ -42,11 +42,11 @@ public class Thema {
         this.id = id;
         setTitel(titel);
         setBeschreibungMarkdown(beschreibung);
-        this.voraussetzungen = voraussetzungen != null ? voraussetzungen : new HashSet<>();
-        this.fachgebiete = fachgebiete != null ? fachgebiete : new HashSet<>();
-        this.dateien = dateien != null ? dateien : new HashSet<>();
-        this.links = links != null ? links : new HashSet<>();
-        this.betreuer = betreuer != null ? betreuer : new HashSet<>();
+        this.voraussetzungen = voraussetzungen != null ? new HashSet<>(voraussetzungen) : new HashSet<>();
+        this.fachgebiete = fachgebiete != null ? new HashSet<>(fachgebiete) : new HashSet<>();
+        this.dateien = dateien != null ? new HashSet<>(dateien) : new HashSet<>();
+        this.links = links != null ? new HashSet<>(links) : new HashSet<>();
+        this.betreuer = betreuer != null ? new HashSet<>(betreuer) : new HashSet<>();
     }
 
     public UUID getId() {
@@ -83,7 +83,7 @@ public class Thema {
     }
 
     public void setVoraussetzungen(Set<Kurs> voraussetzungen) {
-        this.voraussetzungen = voraussetzungen != null ? voraussetzungen : new HashSet<>();
+        this.voraussetzungen = voraussetzungen != null ? new HashSet<>(voraussetzungen) : new HashSet<>();
     }
 
     public Set<Fachgebiet> getFachgebiete() {
@@ -91,7 +91,7 @@ public class Thema {
     }
 
     public void setFachgebiete(Set<Fachgebiet> fachgebiete) {
-        this.fachgebiete = fachgebiete != null ? fachgebiete : new HashSet<>();
+        this.fachgebiete = fachgebiete != null ? new HashSet<>(fachgebiete) : new HashSet<>();
     }
 
     public Set<Informationsdatei> getDateien() {
@@ -99,7 +99,7 @@ public class Thema {
     }
 
     public void setDateien(Set<Informationsdatei> dateien) {
-        this.dateien = dateien != null ? dateien : new HashSet<>();
+        this.dateien = dateien != null ? new HashSet<>(dateien) : new HashSet<>();
     }
 
     public Set<Link> getLinks() {
@@ -107,7 +107,7 @@ public class Thema {
     }
 
     public void setLinks(Set<Link> links) {
-        this.links = links != null ? links : new HashSet<>();
+        this.links = links != null ? new HashSet<>(links) : new HashSet<>();
     }
 
     public void addLink(Link link) {
@@ -137,7 +137,7 @@ public class Thema {
     }
 
     public void assignBetreuer(UUID betreuerId) {
-        Betreuer betreuer = new Betreuer(betreuerId, "");
+        Betreuer betreuer = new Betreuer(betreuerId, "Unbekannt");
         this.betreuer.add(betreuer);
     }
 

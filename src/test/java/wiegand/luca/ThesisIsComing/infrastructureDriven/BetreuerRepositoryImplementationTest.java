@@ -143,6 +143,37 @@ class BetreuerRepositoryImplementationTest extends TestPostgresContainer {
     }
 
     @Test
+    @DisplayName("deleteById removes Betreuer and linked data")
+    void deleteById_removes_betreuer_and_links() {
+        UUID id = UUID.randomUUID();
+        Kontaktinformationen kontakt = new Kontaktinformationen("a@b.de", "M-1");
+        Betreuer betreuer = new Betreuer(
+                id,
+                "Anna",
+                kontakt,
+                Set.of(),
+                Set.of(),
+                Set.of(new Link("https://example.com", "Beispiel"))
+        );
+        betreuerRepository.save(betreuer);
+
+        betreuerRepository.deleteById(id);
+
+        Integer betreuerCount = jdbcTemplate.queryForObject(
+                "select count(*) from betreuer where id = ?",
+                Integer.class,
+                id
+        );
+        Integer linkCount = jdbcTemplate.queryForObject(
+                "select count(*) from betreuer_link where betreuer_id = ?",
+                Integer.class,
+                id
+        );
+        assertThat(betreuerCount).isEqualTo(0);
+        assertThat(linkCount).isEqualTo(0);
+    }
+
+    @Test
     @DisplayName("findByGithubLogin returns Betreuer when login matches")
     void findByGithubLogin_returns_betreuer() {
         UUID id = UUID.randomUUID();

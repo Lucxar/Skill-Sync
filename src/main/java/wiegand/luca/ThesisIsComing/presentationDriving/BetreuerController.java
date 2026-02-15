@@ -2,15 +2,18 @@ package wiegand.luca.ThesisIsComing.presentationDriving;
 
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.view.RedirectView;
 import org.springframework.security.access.prepost.PreAuthorize;
+import jakarta.validation.Valid;
 import wiegand.luca.ThesisIsComing.ApplicationService.BetreuerService;
 import wiegand.luca.ThesisIsComing.ApplicationService.BetreuerThemenBeziehungService;
 import wiegand.luca.ThesisIsComing.ApplicationService.ThemaService;
+import wiegand.luca.ThesisIsComing.ApplicationService.exception.BetreuerValidationException;
 import wiegand.luca.ThesisIsComing.domainModel.Betreuer;
 import wiegand.luca.ThesisIsComing.domainModel.exception.InvalidLinkException;
 import wiegand.luca.ThesisIsComing.domainModel.exception.LinkNotFoundException;
@@ -56,6 +59,70 @@ public class BetreuerController {
     public String getBetreuerById(@PathVariable UUID id, Model model) {
         populateDetailModel(id, model);
         return "betreuer/detail";
+    }
+
+    @GetMapping("/betreuer/neu")
+    @PreAuthorize("hasAnyRole('ADMIN','BETREUER')")
+    public String showCreateForm(Model model) {
+        model.addAttribute("betreuerForm", new BetreuerForm("", null, null));
+        populateFormModel(model, null, "Betreuer anlegen", "Anlegen");
+        return "betreuer/form";
+    }
+
+    @PostMapping("/betreuer")
+    @PreAuthorize("hasAnyRole('ADMIN','BETREUER')")
+    public String createBetreuer(@Valid BetreuerForm form, BindingResult bindingResult, Model model) {
+        if (bindingResult.hasErrors()) {
+            populateFormModel(model, null, "Betreuer anlegen", "Anlegen");
+            return "betreuer/form";
+        }
+        try {
+            var created = service.createBetreuer(form.name(), form.email(), form.matrikelnummer());
+            return "redirect:/betreuer/" + created.getId();
+        } catch (BetreuerValidationException ex) {
+            bindingResult.rejectValue("name", "betreuer.name.invalid", ex.getMessage());
+            populateFormModel(model, null, "Betreuer anlegen", "Anlegen");
+            return "betreuer/form";
+        }
+    }
+
+    @GetMapping("/betreuer/{id}/bearbeiten")
+    @PreAuthorize("hasAnyRole('ADMIN','BETREUER')")
+    public String showEditForm(@PathVariable UUID id, Model model) {
+        var betreuer = service.getById(id);
+        var kontakt = betreuer.getKontaktinformationen();
+        String email = kontakt != null ? kontakt.getEmail() : null;
+        String matrikelnummer = kontakt != null ? kontakt.getMatrikelnummer() : null;
+        model.addAttribute("betreuerForm", new BetreuerForm(betreuer.getName(), email, matrikelnummer));
+        populateFormModel(model, id, "Betreuer bearbeiten", "Speichern");
+        return "betreuer/form";
+    }
+
+    @PostMapping("/betreuer/{id}/bearbeiten")
+    @PreAuthorize("hasAnyRole('ADMIN','BETREUER')")
+    public String updateBetreuer(@PathVariable UUID id,
+                                 @Valid BetreuerForm form,
+                                 BindingResult bindingResult,
+                                 Model model) {
+        if (bindingResult.hasErrors()) {
+            populateFormModel(model, id, "Betreuer bearbeiten", "Speichern");
+            return "betreuer/form";
+        }
+        try {
+            service.updateBetreuer(id, form.name(), form.email(), form.matrikelnummer());
+            return "redirect:/betreuer/" + id;
+        } catch (BetreuerValidationException ex) {
+            bindingResult.rejectValue("name", "betreuer.name.invalid", ex.getMessage());
+            populateFormModel(model, id, "Betreuer bearbeiten", "Speichern");
+            return "betreuer/form";
+        }
+    }
+
+    @PostMapping("/betreuer/{id}/loeschen")
+    @PreAuthorize("hasAnyRole('ADMIN','BETREUER')")
+    public String deleteBetreuer(@PathVariable UUID id) {
+        service.deleteBetreuer(id);
+        return "redirect:/betreuer";
     }
 
     @PostMapping("/betreuer/{id}/themen")
@@ -109,6 +176,13 @@ public class BetreuerController {
         model.addAttribute("betreuer", betreuer);
         model.addAttribute("themen", service.findThemenByBetreuerIdOrderByTitel(id));
         model.addAttribute("allThemen", themaService.listAll());
+    }
+
+    private void populateFormModel(Model model, UUID id, String pageTitle, String submitLabel) {
+        String formAction = id == null ? "/betreuer" : "/betreuer/" + id + "/bearbeiten";
+        model.addAttribute("formAction", formAction);
+        model.addAttribute("pageTitle", pageTitle);
+        model.addAttribute("submitLabel", submitLabel);
     }
 
 

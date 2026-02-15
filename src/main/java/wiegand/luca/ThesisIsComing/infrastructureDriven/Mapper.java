@@ -57,7 +57,7 @@ public class Mapper {
             return result;
         }
         for (BetreuerThemaDto dto : dtos) {
-            result.add(new Thema(dto.themaId(), ""));
+            result.add(new Thema(dto.themaId(), "Unbekannt"));
         }
         return result;
     }

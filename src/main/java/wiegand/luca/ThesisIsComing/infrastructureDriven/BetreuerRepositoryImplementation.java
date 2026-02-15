@@ -55,6 +55,11 @@ public class BetreuerRepositoryImplementation implements BetreuerRepository {
     }
 
     @Override
+    public void deleteById(UUID id) {
+        dataRepository.deleteById(id);
+    }
+
+    @Override
     public List<UUID> findThemaIdsByBetreuerId(UUID betreuerId) {
         return dataRepository.findThemaIdsByBetreuerId(betreuerId);
     }

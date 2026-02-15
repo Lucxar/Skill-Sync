@@ -10,6 +10,14 @@
     <section>
         <h1 th:text="${betreuer.name}">Betreuer</h1>
 
+        <div sec:authorize="hasAnyRole('ADMIN','BETREUER')">
+            <a th:href="@{'/betreuer/' + ${betreuer.id} + '/bearbeiten'}">Betreuer bearbeiten</a>
+            <form th:action="@{'/betreuer/' + ${betreuer.id} + '/loeschen'}" method="post">
+                <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+                <button type="submit">Betreuer loeschen</button>
+            </form>
+        </div>
+
         <div>
             <h2>Kontakt</h2>
             <p th:if="${betreuer.kontaktinformationen != null}">

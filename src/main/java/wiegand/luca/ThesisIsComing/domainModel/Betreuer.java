@@ -26,9 +26,9 @@ public class Betreuer {
 
     public Betreuer (String name, Kontaktinformationen kontaktinformationen) {
         this.id = UUID.randomUUID();
-        this.name = name;
+        setName(name);
         this.githubLogin = null;
-        this.kontaktinformationen = kontaktinformationen;
+        setKontaktinformationen(kontaktinformationen);
         this.fachgebiete = new HashSet<>();
         this.dateien = new HashSet<>();
         this.links = new HashSet<>();
@@ -37,9 +37,9 @@ public class Betreuer {
 
     public Betreuer(UUID id, String name) {
         this.id = id;
-        this.name = name;
+        setName(name);
         this.githubLogin = null;
-        this.kontaktinformationen = null;
+        setKontaktinformationen(null);
         this.fachgebiete = new HashSet<>();
         this.dateien = new HashSet<>();
         this.links = new HashSet<>();
@@ -54,12 +54,12 @@ public class Betreuer {
                     Set<Informationsdatei> dateien,
                     Set<Link> links) {
         this.id = id;
-        this.name = name;
+        setName(name);
         this.githubLogin = githubLogin;
-        this.kontaktinformationen = kontaktinformationen;
-        this.fachgebiete = fachgebiete != null ? fachgebiete : new HashSet<>();
-        this.dateien = dateien != null ? dateien : new HashSet<>();
-        this.links = links != null ? links : new HashSet<>();
+        setKontaktinformationen(kontaktinformationen);
+        this.fachgebiete = fachgebiete != null ? new HashSet<>(fachgebiete) : new HashSet<>();
+        this.dateien = dateien != null ? new HashSet<>(dateien) : new HashSet<>();
+        this.links = links != null ? new HashSet<>(links) : new HashSet<>();
         this.themen = new HashSet<>();
     }
 
@@ -75,12 +75,20 @@ public class Betreuer {
         return name;
     }
 
+    public void setName(String name) {
+        this.name = normalizeName(name);
+    }
+
     public String getGithubLogin() {
         return githubLogin;
     }
 
     public Kontaktinformationen getKontaktinformationen() {
         return kontaktinformationen;
+    }
+
+    public void setKontaktinformationen(Kontaktinformationen kontaktinformationen) {
+        this.kontaktinformationen = normalizeKontaktinformationen(kontaktinformationen);
     }
 
     public Set<Fachgebiet> getFachgebiete() {
@@ -97,6 +105,11 @@ public class Betreuer {
 
     public Set<Thema> getThemen() {
         return themen;
+    }
+
+    public void updateDetails(String name, String email, String matrikelnummer) {
+        setName(name);
+        setKontaktinformationen(new Kontaktinformationen(email, matrikelnummer));
     }
 
     public void addLink(Link link) {
@@ -122,8 +135,35 @@ public class Betreuer {
     }
 
     public void assignThema(UUID themaId) {
-        Thema thema = new Thema(themaId, "");
+        Thema thema = new Thema(themaId, "Unbekannt");
         this.themen.add(thema);
+    }
+
+    private static String normalizeName(String name) {
+        if (name == null || name.trim().isEmpty()) {
+            throw new IllegalArgumentException("Name darf nicht leer sein");
+        }
+        return name.trim();
+    }
+
+    private static Kontaktinformationen normalizeKontaktinformationen(Kontaktinformationen kontaktinformationen) {
+        if (kontaktinformationen == null) {
+            return null;
+        }
+        String email = normalizeOptional(kontaktinformationen.getEmail());
+        String matrikelnummer = normalizeOptional(kontaktinformationen.getMatrikelnummer());
+        if (email == null && matrikelnummer == null) {
+            return null;
+        }
+        return new Kontaktinformationen(email, matrikelnummer);
+    }
+
+    private static String normalizeOptional(String value) {
+        if (value == null) {
+            return null;
+        }
+        String trimmed = value.trim();
+        return trimmed.isEmpty() ? null : trimmed;
     }
 
     @Override

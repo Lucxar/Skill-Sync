@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="de" xmlns:th="http://www.thymeleaf.org">
+<html lang="de" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -9,11 +9,15 @@
 <main>
     <section>
         <h1>Betreuerliste</h1>
+        <div sec:authorize="hasAnyRole('ADMIN','BETREUER')">
+            <a th:href="@{/betreuer/neu}">Neuen Betreuer anlegen</a>
+        </div>
         <ul>
             <li th:each="b : ${betreuer}">
                 <a th:href="@{/betreuer/{id}(id=${b.id})}" th:text="${b.name}">Betreuer</a>
             </li>
         </ul>
+        <p th:if="${betreuer == null || #lists.isEmpty(betreuer)}">Keine Betreuer vorhanden</p>
     </section>
 </main>
 </body>
