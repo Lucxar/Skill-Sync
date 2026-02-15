@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="de" xmlns:th="http://www.thymeleaf.org">
+<html lang="de" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -44,6 +44,29 @@
                     <span th:text="${d.titel}">Titel</span>
                 </li>
             </ul>
+        </div>
+
+        <div>
+            <h2>Themen</h2>
+            <ul>
+                <li th:each="t : ${themen}">
+                    <span th:text="${t.titel}">Thema</span>
+                </li>
+            </ul>
+        </div>
+
+        <div sec:authorize="hasAnyRole('ADMIN','BETREUER')">
+            <h2>Thema zuordnen</h2>
+            <form th:action="@{'/betreuer/' + ${betreuer.id} + '/themen'}" method="post">
+                <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+                <label for="themaId">Thema</label>
+                <select id="themaId" name="themaId" required>
+                    <option value="" disabled selected>Bitte waehlen</option>
+                    <option th:each="t : ${allThemen}" th:value="${t.id}" th:text="${t.titel}">Thema</option>
+                </select>
+                <button type="submit">Zuordnen</button>
+            </form>
+            <p th:if="${allThemen == null || #lists.isEmpty(allThemen)}">Keine Themen verfuegbar</p>
         </div>
     </section>
 </main>

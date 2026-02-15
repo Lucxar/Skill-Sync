@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="de" xmlns:th="http://www.thymeleaf.org">
+<html lang="de" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -51,6 +51,30 @@
             </ul>
             <p th:if="${thema.dateien == null || #lists.isEmpty(thema.dateien)}">Keine Dateien</p>
         </div>
+
+        <div>
+            <h2>Betreuer</h2>
+            <ul>
+                <li th:each="b : ${betreuer}">
+                    <span th:text="${b.name}">Betreuer</span>
+                </li>
+            </ul>
+        </div>
+
+        <div sec:authorize="hasAnyRole('ADMIN','BETREUER')">
+            <h2>Betreuer zuordnen</h2>
+            <form th:action="@{'/themen/' + ${thema.id} + '/betreuer'}" method="post">
+                <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+                <label for="betreuerId">Betreuer</label>
+                <select id="betreuerId" name="betreuerId" required>
+                    <option value="" disabled selected>Bitte waehlen</option>
+                    <option th:each="b : ${allBetreuer}" th:value="${b.id}" th:text="${b.name}">Betreuer</option>
+                </select>
+                <button type="submit">Zuordnen</button>
+            </form>
+            <p th:if="${allBetreuer == null || #lists.isEmpty(allBetreuer)}">Keine Betreuer verfuegbar</p>
+        </div>
+
     </section>
 </main>
 </body>
