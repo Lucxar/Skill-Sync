@@ -41,6 +41,11 @@ public class BetreuerRepositoryImplementation implements BetreuerRepository {
     }
 
     @Override
+    public Iterable<Betreuer> findAllForMatching() {
+        return findAll();
+    }
+
+    @Override
     public Betreuer save(Betreuer betreuer) {
         BetreuerDto dto = Mapper.toBetreuerDto(betreuer);
         BetreuerDto saved = (dto.id() != null && dataRepository.existsById(dto.id()))

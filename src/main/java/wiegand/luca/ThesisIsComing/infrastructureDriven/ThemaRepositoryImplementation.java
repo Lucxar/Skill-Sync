@@ -44,6 +44,11 @@ public class ThemaRepositoryImplementation implements ThemaRepository {
     }
 
     @Override
+    public Iterable<Thema> findAllForMatching() {
+        return findAll();
+    }
+
+    @Override
     public Thema save(Thema thema) {
         ThemaDto dto = Mapper.toThemaDto(thema);
         ThemaDto saved = (dto.id() != null && repository.existsById(dto.id()))

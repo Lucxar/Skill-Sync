@@ -12,6 +12,7 @@ public interface ThemaRepository {
     Optional<Thema> findByTitel(String titel);
     Optional<Thema> findById(UUID id);
     Iterable<Thema> findAll();
+    Iterable<Thema> findAllForMatching();
     Thema save(Thema thema);
     void deleteById(UUID id);
 

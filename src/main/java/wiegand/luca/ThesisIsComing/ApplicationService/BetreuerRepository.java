@@ -10,6 +10,7 @@ import java.util.UUID;
 public interface BetreuerRepository {
     Optional<Betreuer> findById(UUID id);
     Iterable<Betreuer> findAll();
+    Iterable<Betreuer> findAllForMatching();
     Betreuer save(Betreuer betreuer);
     Optional<Betreuer> findByGithubLogin(String githubLogin);
     void deleteById(UUID id);

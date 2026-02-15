@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="de" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Matching-Ergebnisse</title>
+</head>
+<body>
+<main>
+    <section>
+        <h1>Matching-Ergebnisse</h1>
+        <a th:href="@{/matching}">Neue Suche</a>
+    </section>
+
+    <section>
+        <h2>Passende Themen</h2>
+        <ul>
+            <li th:each="match : ${themenMatches}">
+                <a th:href="@{/themen/{id}(id=${match.thema.id})}" th:text="${match.thema.titel}">Thema</a>
+                <span>Score: </span><span th:text="${match.score}">0</span>
+                <div>
+                    <strong>Passende Fachgebiete:</strong>
+                    <span th:if="${#lists.isEmpty(match.passendeFachgebiete)}">Keine</span>
+                    <ul th:if="${!#lists.isEmpty(match.passendeFachgebiete)}">
+                        <li th:each="fach : ${match.passendeFachgebiete}" th:text="${fach}">Fachgebiet</li>
+                    </ul>
+                </div>
+                <div>
+                    <strong>Passende Kurse:</strong>
+                    <span th:if="${#lists.isEmpty(match.passendeKurse)}">Keine</span>
+                    <ul th:if="${!#lists.isEmpty(match.passendeKurse)}">
+                        <li th:each="kurs : ${match.passendeKurse}" th:text="${kurs}">Kurs</li>
+                    </ul>
+                </div>
+            </li>
+        </ul>
+        <p th:if="${themenMatches == null || #lists.isEmpty(themenMatches)}">Keine passenden Themen gefunden.</p>
+    </section>
+
+    <section>
+        <h2>Passende Betreuer</h2>
+        <ul>
+            <li th:each="match : ${betreuerMatches}">
+                <a th:href="@{/betreuer/{id}(id=${match.betreuer.id})}" th:text="${match.betreuer.name}">Betreuer</a>
+                <span>Score: </span><span th:text="${match.score}">0</span>
+                <div>
+                    <strong>Passende Fachgebiete:</strong>
+                    <span th:if="${#lists.isEmpty(match.passendeFachgebiete)}">Keine</span>
+                    <ul th:if="${!#lists.isEmpty(match.passendeFachgebiete)}">
+                        <li th:each="fach : ${match.passendeFachgebiete}" th:text="${fach}">Fachgebiet</li>
+                    </ul>
+                </div>
+            </li>
+        </ul>
+        <p th:if="${betreuerMatches == null || #lists.isEmpty(betreuerMatches)}">Keine passenden Betreuer gefunden.</p>
+    </section>
+</main>
+</body>
+</html>
