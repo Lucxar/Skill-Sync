@@ -110,6 +110,49 @@ public class ThemaRepositoryImplementationTest extends TestPostgresContainer {
     }
 
     @Test
+    @DisplayName("save updates links for Thema")
+    void save_updates_links_for_thema() {
+        UUID id = UUID.randomUUID();
+        Thema thema = new Thema(
+                id,
+                "Titel 1",
+                null,
+                Set.of(),
+                Set.of(),
+                Set.of(),
+                Set.of(new Link("https://alt", "Alt")),
+                Set.of()
+        );
+        themaRepository.save(thema);
+
+        Thema updated = new Thema(
+                id,
+                "Titel 1",
+                null,
+                Set.of(),
+                Set.of(),
+                Set.of(),
+                Set.of(new Link("https://neu", "Neu")),
+                Set.of()
+        );
+        themaRepository.save(updated);
+
+        Integer count = jdbcTemplate.queryForObject(
+                "select count(*) from thema_link where thema_id = ?",
+                Integer.class,
+                id
+        );
+        assertThat(count).isEqualTo(1);
+
+        var row = jdbcTemplate.queryForMap(
+                "select url, anzeigetext from thema_link where thema_id = ?",
+                id
+        );
+        assertThat(row.get("url")).isEqualTo("https://neu");
+        assertThat(row.get("anzeigetext")).isEqualTo("Neu");
+    }
+
+    @Test
     @DisplayName("findByTitel returns the correct Thema")
     void findByTitel_returns_correct_thema() {
         UUID id = UUID.randomUUID();
@@ -179,6 +222,38 @@ public class ThemaRepositoryImplementationTest extends TestPostgresContainer {
         assertThat(themaRepository.findBetreuerByThemaIdOrderByName(themaId))
                 .extracting(Betreuer::getName)
                 .containsExactly("Anna", "Bernd");
+    }
+
+    @Test
+    @DisplayName("deleteById removes Thema and linked data")
+    void deleteById_removes_thema_and_links() {
+        UUID id = UUID.randomUUID();
+        Thema thema = new Thema(
+                id,
+                "Titel 1",
+                null,
+                Set.of(),
+                Set.of(),
+                Set.of(),
+                Set.of(new Link("https://example.com", "Beispiel")),
+                Set.of()
+        );
+        themaRepository.save(thema);
+
+        themaRepository.deleteById(id);
+
+        Integer themaCount = jdbcTemplate.queryForObject(
+                "select count(*) from thema where id = ?",
+                Integer.class,
+                id
+        );
+        Integer linkCount = jdbcTemplate.queryForObject(
+                "select count(*) from thema_link where thema_id = ?",
+                Integer.class,
+                id
+        );
+        assertThat(themaCount).isEqualTo(0);
+        assertThat(linkCount).isEqualTo(0);
     }
 
 

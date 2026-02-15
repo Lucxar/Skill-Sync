@@ -1,7 +1,9 @@
 package wiegand.luca.ThesisIsComing.ApplicationService;
 
 import org.springframework.stereotype.Service;
+import wiegand.luca.ThesisIsComing.ApplicationService.exception.ThemaDeleteNotAllowedException;
 import wiegand.luca.ThesisIsComing.ApplicationService.exception.ThemaNotFoundException;
+import wiegand.luca.ThesisIsComing.ApplicationService.exception.ThemaValidationException;
 import wiegand.luca.ThesisIsComing.domainModel.Betreuer;
 import wiegand.luca.ThesisIsComing.domainModel.Thema;
 import wiegand.luca.ThesisIsComing.domainModel.valueObjects.Link;
@@ -30,6 +32,34 @@ public class ThemaService {
 
     public Thema save(Thema thema) {
         return repository.save(thema);
+    }
+
+    public Thema createThema(String titel, String beschreibungMarkdown) {
+        try {
+            Thema thema = new Thema(UUID.randomUUID(), titel);
+            thema.setBeschreibungMarkdown(beschreibungMarkdown);
+            return repository.save(thema);
+        } catch (IllegalArgumentException ex) {
+            throw new ThemaValidationException(ex.getMessage());
+        }
+    }
+
+    public Thema updateThema(UUID id, String titel, String beschreibungMarkdown) {
+        Thema thema = getById(id);
+        try {
+            thema.updateDetails(titel, beschreibungMarkdown);
+            return repository.save(thema);
+        } catch (IllegalArgumentException ex) {
+            throw new ThemaValidationException(ex.getMessage());
+        }
+    }
+
+    public void deleteThema(UUID id) {
+        getById(id);
+        if (!repository.findBetreuerIdsByThemaId(id).isEmpty()) {
+            throw new ThemaDeleteNotAllowedException("Thema hat zugeordnete Betreuer und kann nicht geloescht werden");
+        }
+        repository.deleteById(id);
     }
 
     public List<Betreuer> getBetreuerByThemaId(UUID themaId) {

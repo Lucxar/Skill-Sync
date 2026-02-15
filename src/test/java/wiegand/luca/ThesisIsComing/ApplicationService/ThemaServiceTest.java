@@ -9,6 +9,8 @@ import org.mockito.Mock;
 import org.mockito.ArgumentCaptor;
 import org.mockito.junit.jupiter.MockitoExtension;
 import wiegand.luca.ThesisIsComing.ApplicationService.exception.ThemaNotFoundException;
+import wiegand.luca.ThesisIsComing.ApplicationService.exception.ThemaDeleteNotAllowedException;
+import wiegand.luca.ThesisIsComing.ApplicationService.exception.ThemaValidationException;
 import wiegand.luca.ThesisIsComing.domainModel.Thema;
 import wiegand.luca.ThesisIsComing.domainModel.exception.InvalidLinkException;
 import wiegand.luca.ThesisIsComing.domainModel.valueObjects.Link;
@@ -22,6 +24,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -123,6 +126,76 @@ public class ThemaServiceTest {
 
         assertThatThrownBy(() -> service.addLink(id, " ", ""))
                 .isInstanceOf(InvalidLinkException.class);
+    }
+
+    @Test
+    @DisplayName("createThema saves and returns created Thema")
+    void createThema_saves_and_returns_created_thema() {
+        when(repo.save(any(Thema.class))).thenAnswer(invocation -> invocation.getArgument(0));
+
+        Thema created = service.createThema("Neues Thema", "Beschreibung");
+
+        ArgumentCaptor<Thema> captor = ArgumentCaptor.forClass(Thema.class);
+        verify(repo).save(captor.capture());
+        assertThat(captor.getValue().getTitel()).isEqualTo("Neues Thema");
+        assertThat(created.getTitel()).isEqualTo("Neues Thema");
+    }
+
+    @Test
+    @DisplayName("createThema throws when title is blank")
+    void createThema_throws_when_title_blank() {
+        assertThatThrownBy(() -> service.createThema(" ", null))
+                .isInstanceOf(ThemaValidationException.class);
+        verify(repo, never()).save(any(Thema.class));
+    }
+
+    @Test
+    @DisplayName("updateThema updates titel and description")
+    void updateThema_updates_details() {
+        UUID id = UUID.randomUUID();
+        Thema thema = new Thema(id, "Alt", "Alt", Set.of(), Set.of(), Set.of(), Set.of(), Set.of());
+        when(repo.findById(id)).thenReturn(Optional.of(thema));
+        when(repo.save(any(Thema.class))).thenAnswer(invocation -> invocation.getArgument(0));
+
+        Thema updated = service.updateThema(id, "Neu", "Neu Beschreibung");
+
+        assertThat(updated.getTitel()).isEqualTo("Neu");
+        assertThat(updated.getBeschreibungMarkdown()).isEqualTo("Neu Beschreibung");
+    }
+
+    @Test
+    @DisplayName("updateThema throws when title is blank")
+    void updateThema_throws_when_title_blank() {
+        UUID id = UUID.randomUUID();
+        when(repo.findById(id)).thenReturn(Optional.of(new Thema(id, "Alt")));
+
+        assertThatThrownBy(() -> service.updateThema(id, " ", null))
+                .isInstanceOf(ThemaValidationException.class);
+        verify(repo, never()).save(any(Thema.class));
+    }
+
+    @Test
+    @DisplayName("deleteThema deletes when no Betreuer assigned")
+    void deleteThema_deletes_when_allowed() {
+        UUID id = UUID.randomUUID();
+        when(repo.findById(id)).thenReturn(Optional.of(new Thema(id, "Thema")));
+        when(repo.findBetreuerIdsByThemaId(id)).thenReturn(List.of());
+
+        service.deleteThema(id);
+
+        verify(repo).deleteById(id);
+    }
+
+    @Test
+    @DisplayName("deleteThema throws when Betreuer assigned")
+    void deleteThema_throws_when_betreuer_assigned() {
+        UUID id = UUID.randomUUID();
+        when(repo.findById(id)).thenReturn(Optional.of(new Thema(id, "Thema")));
+        when(repo.findBetreuerIdsByThemaId(id)).thenReturn(List.of(UUID.randomUUID()));
+
+        assertThatThrownBy(() -> service.deleteThema(id))
+                .isInstanceOf(ThemaDeleteNotAllowedException.class);
+        verify(repo, never()).deleteById(id);
     }
 
 }

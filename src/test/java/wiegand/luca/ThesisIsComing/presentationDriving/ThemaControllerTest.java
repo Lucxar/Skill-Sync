@@ -178,6 +178,107 @@ public class ThemaControllerTest {
                 .andExpect(status().isForbidden());
     }
 
+    @Test
+    @DisplayName("/themen/neu returns form view for admins")
+    @WithMockUser(roles = "ADMIN")
+    void themen_neu_returns_form_view() throws Exception {
+        mvc.perform(get("/themen/neu"))
+                .andExpect(status().isOk())
+                .andExpect(view().name("thema/form"))
+                .andExpect(model().attributeExists("themaForm"));
+    }
+
+    @Test
+    @DisplayName("POST /themen creates Thema and redirects")
+    @WithMockUser(roles = "ADMIN")
+    void create_thema_redirects() throws Exception {
+        UUID id = UUID.randomUUID();
+        when(service.createThema(any(String.class), any(String.class)))
+                .thenReturn(new Thema(id, "Neues Thema"));
+
+        mvc.perform(post("/themen")
+                        .with(SecurityMockMvcRequestPostProcessors.csrf())
+                        .param("titel", "Neues Thema")
+                        .param("beschreibungMarkdown", "Beschreibung"))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl("/themen/" + id));
+    }
+
+    @Test
+    @DisplayName("POST /themen returns form errors for blank title")
+    @WithMockUser(roles = "ADMIN")
+    void create_thema_returns_errors_on_blank_title() throws Exception {
+        mvc.perform(post("/themen")
+                        .with(SecurityMockMvcRequestPostProcessors.csrf())
+                        .param("titel", " ")
+                        .param("beschreibungMarkdown", "Beschreibung"))
+                .andExpect(status().isOk())
+                .andExpect(view().name("thema/form"))
+                .andExpect(model().attributeHasFieldErrors("themaForm", "titel"));
+    }
+
+    @Test
+    @DisplayName("/themen/{id}/bearbeiten returns form view")
+    @WithMockUser(roles = "ADMIN")
+    void edit_form_returns_view() throws Exception {
+        UUID id = UUID.randomUUID();
+        when(service.getById(id)).thenReturn(new Thema(id, "Thema 1"));
+
+        mvc.perform(get("/themen/{id}/bearbeiten", id))
+                .andExpect(status().isOk())
+                .andExpect(view().name("thema/form"))
+                .andExpect(model().attributeExists("themaForm"));
+    }
+
+    @Test
+    @DisplayName("POST /themen/{id}/bearbeiten updates and redirects")
+    @WithMockUser(roles = "ADMIN")
+    void update_thema_redirects() throws Exception {
+        UUID id = UUID.randomUUID();
+        when(service.updateThema(any(UUID.class), any(String.class), any(String.class)))
+                .thenReturn(new Thema(id, "Neu"));
+
+        mvc.perform(post("/themen/{id}/bearbeiten", id)
+                        .with(SecurityMockMvcRequestPostProcessors.csrf())
+                        .param("titel", "Neu")
+                        .param("beschreibungMarkdown", ""))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl("/themen/" + id));
+    }
+
+    @Test
+    @DisplayName("POST /themen/{id}/loeschen deletes and redirects")
+    @WithMockUser(roles = "ADMIN")
+    void delete_thema_redirects() throws Exception {
+        UUID id = UUID.randomUUID();
+
+        mvc.perform(post("/themen/{id}/loeschen", id)
+                        .with(SecurityMockMvcRequestPostProcessors.csrf()))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl("/themen"));
+
+        verify(service).deleteThema(id);
+    }
+
+    @Test
+    @DisplayName("POST /themen is forbidden for students")
+    @WithMockUser(roles = "STUDIERENDE")
+    void create_thema_forbidden_for_students() throws Exception {
+        mvc.perform(post("/themen")
+                        .with(SecurityMockMvcRequestPostProcessors.csrf())
+                        .param("titel", "Neues Thema"))
+                .andExpect(status().isForbidden());
+    }
+
+    @Test
+    @DisplayName("POST /themen/{id}/loeschen is forbidden for students")
+    @WithMockUser(roles = "STUDIERENDE")
+    void delete_thema_forbidden_for_students() throws Exception {
+        mvc.perform(post("/themen/{id}/loeschen", UUID.randomUUID())
+                        .with(SecurityMockMvcRequestPostProcessors.csrf()))
+                .andExpect(status().isForbidden());
+    }
+
 
     @Test
     @DisplayName("/themen returns 404 when list is empty")

@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="de" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title th:text="${pageTitle}">Thema</title>
+</head>
+<body>
+<main>
+    <section>
+        <h1 th:text="${pageTitle}">Thema</h1>
+        <form th:action="${formAction}" th:object="${themaForm}" method="post">
+            <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+            <div>
+                <label for="titel">Titel</label>
+                <input type="text" id="titel" th:field="*{titel}" required />
+                <p th:if="${#fields.hasErrors('titel')}" th:errors="*{titel}">Fehler</p>
+            </div>
+            <div>
+                <label for="beschreibungMarkdown">Beschreibung (optional)</label>
+                <textarea id="beschreibungMarkdown" th:field="*{beschreibungMarkdown}" rows="6"></textarea>
+            </div>
+            <button type="submit" th:text="${submitLabel}">Speichern</button>
+        </form>
+        <a th:href="@{/themen}">Zurueck zur Liste</a>
+    </section>
+</main>
+</body>
+</html>

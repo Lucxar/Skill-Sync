@@ -53,6 +53,11 @@ public class ThemaRepositoryImplementation implements ThemaRepository {
     }
 
     @Override
+    public void deleteById(UUID id) {
+        repository.deleteById(id);
+    }
+
+    @Override
     public List<UUID> findBetreuerIdsByThemaId(UUID themaId) {
         return repository.findBetreuerIdsByThemaId(themaId);
     }

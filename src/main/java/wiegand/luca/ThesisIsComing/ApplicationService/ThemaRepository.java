@@ -13,6 +13,7 @@ public interface ThemaRepository {
     Optional<Thema> findById(UUID id);
     Iterable<Thema> findAll();
     Thema save(Thema thema);
+    void deleteById(UUID id);
 
     List<UUID> findBetreuerIdsByThemaId(UUID themaId);
     List<Betreuer> findBetreuerByThemaId(UUID themaId);

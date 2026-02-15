@@ -9,6 +9,15 @@
 <main>
     <section>
         <h1 th:text="${thema.titel}">Thema</h1>
+        <p th:if="${themaError != null}" th:text="${themaError}">Fehler</p>
+
+        <div sec:authorize="hasAnyRole('ADMIN','BETREUER')">
+            <a th:href="@{'/themen/' + ${thema.id} + '/bearbeiten'}">Thema bearbeiten</a>
+            <form th:action="@{'/themen/' + ${thema.id} + '/loeschen'}" method="post">
+                <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+                <button type="submit">Thema loeschen</button>
+            </form>
+        </div>
 
         <div>
             <h2>Beschreibung</h2>

@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="de" xmlns:th="http://www.thymeleaf.org">
+<html lang="de" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -9,6 +9,9 @@
 <main>
     <section>
         <h1>Themenliste</h1>
+        <div sec:authorize="hasAnyRole('ADMIN','BETREUER')">
+            <a th:href="@{/themen/neu}">Neues Thema anlegen</a>
+        </div>
         <ul>
             <li th:each="t : ${themen}">
                 <a th:href="@{/themen/{id}(id=${t.id})}" th:text="${t.titel}">Thema</a>
