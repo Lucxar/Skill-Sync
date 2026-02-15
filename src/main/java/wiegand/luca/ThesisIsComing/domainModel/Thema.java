@@ -8,6 +8,7 @@ import wiegand.luca.ThesisIsComing.domainModel.valueObjects.Link;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 import java.util.UUID;
 
@@ -109,6 +110,23 @@ public class Thema {
     public void assignBetreuer(UUID betreuerId) {
         Betreuer betreuer = new Betreuer(betreuerId, "");
         this.betreuer.add(betreuer);
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (!(o instanceof Thema)) {
+            return false;
+        }
+        Thema other = (Thema) o;
+        return Objects.equals(id, other.id);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id);
     }
 
 
