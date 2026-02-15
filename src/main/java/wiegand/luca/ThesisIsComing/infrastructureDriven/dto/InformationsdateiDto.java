@@ -2,6 +2,7 @@ package wiegand.luca.ThesisIsComing.infrastructureDriven.dto;
 
 import org.springframework.data.annotation.Id;
 import org.springframework.data.relational.core.mapping.Table;
+import wiegand.luca.ThesisIsComing.domainModel.valueObjects.Dateityp;
 
 import java.time.LocalDateTime;
 
@@ -12,6 +13,9 @@ public record InformationsdateiDto(
         String beschreibung,
         String uploaderName,
         LocalDateTime uploadDatum,
-        String dateisystemPfad
+        String dateisystemPfad,
+        Dateityp dateityp,
+        String originalDateiname,
+        long groesseInBytes
 ) {
 }

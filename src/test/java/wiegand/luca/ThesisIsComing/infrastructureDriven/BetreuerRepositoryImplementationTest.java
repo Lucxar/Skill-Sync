@@ -15,12 +15,15 @@ import wiegand.luca.ThesisIsComing.ApplicationService.BetreuerRepository;
 import wiegand.luca.ThesisIsComing.TestPostgresContainer;
 import wiegand.luca.ThesisIsComing.domainModel.Betreuer;
 import wiegand.luca.ThesisIsComing.domainModel.Thema;
+import wiegand.luca.ThesisIsComing.domainModel.valueObjects.Dateityp;
+import wiegand.luca.ThesisIsComing.domainModel.valueObjects.Informationsdatei;
 import wiegand.luca.ThesisIsComing.domainModel.valueObjects.Kontaktinformationen;
 import wiegand.luca.ThesisIsComing.domainModel.valueObjects.Link;
 
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
+import java.time.LocalDateTime;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -100,6 +103,34 @@ class BetreuerRepositoryImplementationTest extends TestPostgresContainer {
         );
         assertThat(row.get("url")).isEqualTo("https://example.com");
         assertThat(row.get("anzeigetext")).isEqualTo("Beispiel");
+    }
+
+    @Test
+    @DisplayName("save persists informationsdatei metadata for Betreuer")
+    void save_persists_informationsdatei_metadata() {
+        UUID id = UUID.randomUUID();
+        Kontaktinformationen kontakt = new Kontaktinformationen("a@b.de", "M-1");
+        Informationsdatei datei = new Informationsdatei(
+                "Info",
+                "Beschreibung",
+                "anna",
+                LocalDateTime.now(),
+                "stored.pdf",
+                Dateityp.PDF,
+                "info.pdf",
+                123L
+        );
+        Betreuer betreuer = new Betreuer(id, "Anna", kontakt, Set.of(), Set.of(datei), Set.of());
+
+        betreuerRepository.save(betreuer);
+
+        var row = jdbcTemplate.queryForMap(
+                "select dateityp, original_dateiname, groesse_in_bytes from betreuer_informationsdatei where betreuer_id = ?",
+                id
+        );
+        assertThat(row.get("dateityp").toString()).isEqualTo("PDF");
+        assertThat(row.get("original_dateiname")).isEqualTo("info.pdf");
+        assertThat(((Number) row.get("groesse_in_bytes")).longValue()).isEqualTo(123L);
     }
 
     @Test

@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<html lang="de" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title th:text="${datei.titel}">Markdown</title>
+</head>
+<body>
+<main>
+    <section>
+        <h1 th:text="${datei.titel}">Datei</h1>
+        <div th:utext="${contentHtml}">Inhalt</div>
+    </section>
+</main>
+</body>
+</html>

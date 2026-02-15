@@ -9,11 +9,14 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.view.RedirectView;
 import org.springframework.security.access.prepost.PreAuthorize;
+import java.io.IOException;
 import jakarta.validation.Valid;
+import wiegand.luca.ThesisIsComing.ApplicationService.DateiUploadData;
 import wiegand.luca.ThesisIsComing.ApplicationService.BetreuerService;
 import wiegand.luca.ThesisIsComing.ApplicationService.BetreuerThemenBeziehungService;
 import wiegand.luca.ThesisIsComing.ApplicationService.ThemaService;
 import wiegand.luca.ThesisIsComing.ApplicationService.exception.BetreuerValidationException;
+import wiegand.luca.ThesisIsComing.ApplicationService.exception.DateiValidationException;
 import wiegand.luca.ThesisIsComing.domainModel.Betreuer;
 import wiegand.luca.ThesisIsComing.domainModel.exception.InvalidLinkException;
 import wiegand.luca.ThesisIsComing.domainModel.exception.LinkNotFoundException;
@@ -36,11 +39,6 @@ public class BetreuerController {
         this.themaService = themaService;
     }
 
-
-    @PostMapping("/upload")
-    public String handleFileUpload() {
-        return "not implemented yet";
-    }
 
     @GetMapping("/betreuer")
     public String getAllBetreuer(Model model) {
@@ -171,11 +169,48 @@ public class BetreuerController {
         }
     }
 
+    @PostMapping("/betreuer/{id}/dateien")
+    @PreAuthorize("hasAnyRole('ADMIN','BETREUER')")
+    public String uploadDatei(@PathVariable UUID id,
+                              @Valid DateiUploadForm form,
+                              BindingResult bindingResult,
+                              Model model) {
+        if (form.datei() == null || form.datei().isEmpty()) {
+            bindingResult.rejectValue("datei", "datei.empty", "Datei fehlt");
+        }
+        if (bindingResult.hasErrors()) {
+            populateDetailModel(id, model);
+            return "betreuer/detail";
+        }
+        try {
+            DateiUploadData data = new DateiUploadData(
+                    form.titel(),
+                    form.beschreibung(),
+                    form.datei().getOriginalFilename(),
+                    form.datei().getSize(),
+                    form.datei().getBytes()
+            );
+            service.uploadDatei(id, data);
+            return "redirect:/betreuer/" + id;
+        } catch (DateiValidationException ex) {
+            populateDetailModel(id, model);
+            model.addAttribute("dateiError", ex.getMessage());
+            return "betreuer/detail";
+        } catch (IOException ex) {
+            populateDetailModel(id, model);
+            model.addAttribute("dateiError", "Datei konnte nicht gelesen werden");
+            return "betreuer/detail";
+        }
+    }
+
     private void populateDetailModel(UUID id, Model model) {
         Betreuer betreuer = service.getById(id);
         model.addAttribute("betreuer", betreuer);
         model.addAttribute("themen", service.findThemenByBetreuerIdOrderByTitel(id));
         model.addAttribute("allThemen", themaService.listAll());
+        if (!model.containsAttribute("dateiUploadForm")) {
+            model.addAttribute("dateiUploadForm", new DateiUploadForm("", null, null));
+        }
     }
 
     private void populateFormModel(Model model, UUID id, String pageTitle, String submitLabel) {

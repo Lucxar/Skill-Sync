@@ -134,6 +134,23 @@ public class Betreuer {
         }
     }
 
+    public void addDatei(Informationsdatei datei) {
+        if (datei == null) {
+            throw new IllegalArgumentException("Datei darf nicht null sein");
+        }
+        dateien.add(datei);
+    }
+
+    public void removeDatei(Informationsdatei datei) {
+        if (datei == null) {
+            throw new IllegalArgumentException("Datei darf nicht null sein");
+        }
+        boolean removed = dateien.remove(datei);
+        if (!removed) {
+            throw new IllegalArgumentException("Datei wurde nicht gefunden");
+        }
+    }
+
     public void assignThema(UUID themaId) {
         Thema thema = new Thema(themaId, "Unbekannt");
         this.themen.add(thema);

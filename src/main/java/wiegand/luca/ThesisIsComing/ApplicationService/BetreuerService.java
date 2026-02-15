@@ -1,13 +1,19 @@
 package wiegand.luca.ThesisIsComing.ApplicationService;
 
 import org.springframework.stereotype.Service;
-import wiegand.luca.ThesisIsComing.ApplicationService.exception.BetreuerValidationException;
 import wiegand.luca.ThesisIsComing.ApplicationService.exception.BetreuerNotFoundException;
+import wiegand.luca.ThesisIsComing.ApplicationService.exception.BetreuerValidationException;
+import wiegand.luca.ThesisIsComing.ApplicationService.exception.DateiNotFoundException;
+import wiegand.luca.ThesisIsComing.ApplicationService.exception.DateiValidationException;
+import wiegand.luca.ThesisIsComing.ApplicationService.security.CurrentUser;
 import wiegand.luca.ThesisIsComing.domainModel.Betreuer;
 import wiegand.luca.ThesisIsComing.domainModel.Thema;
+import wiegand.luca.ThesisIsComing.domainModel.valueObjects.Dateityp;
+import wiegand.luca.ThesisIsComing.domainModel.valueObjects.Informationsdatei;
 import wiegand.luca.ThesisIsComing.domainModel.valueObjects.Kontaktinformationen;
 import wiegand.luca.ThesisIsComing.domainModel.valueObjects.Link;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.StreamSupport;
@@ -15,10 +21,18 @@ import java.util.stream.StreamSupport;
 @Service
 public class BetreuerService {
 
-    private BetreuerRepository betreuerRepository;
+    private static final long MAX_UPLOAD_BYTES = 10 * 1024 * 1024;
 
-    public BetreuerService(BetreuerRepository betreuerRepository) {
+    private final BetreuerRepository betreuerRepository;
+    private final DateiSpeicher dateiSpeicher;
+    private final CurrentUser currentUser;
+
+    public BetreuerService(BetreuerRepository betreuerRepository,
+                           DateiSpeicher dateiSpeicher,
+                           CurrentUser currentUser) {
         this.betreuerRepository = betreuerRepository;
+        this.dateiSpeicher = dateiSpeicher;
+        this.currentUser = currentUser;
     }
 
 
@@ -91,6 +105,43 @@ public class BetreuerService {
         return betreuerRepository.existsBetreuerThema(betreuerId, themaId);
     }
 
+    public Informationsdatei uploadDatei(UUID betreuerId, DateiUploadData data) {
+        Betreuer betreuer = getById(betreuerId);
+        DateiUploadData validated = validateUploadData(data);
+        Dateityp dateityp = resolveDateityp(validated.originalDateiname());
+        String gespeicherterName = dateiSpeicher.speichere(validated.originalDateiname(), validated.inhalt());
+        String uploaderName = resolveUploaderName();
+        Informationsdatei datei;
+        try {
+            datei = new Informationsdatei(
+                    validated.titel(),
+                    validated.beschreibung(),
+                    uploaderName,
+                    LocalDateTime.now(),
+                    gespeicherterName,
+                    dateityp,
+                    validated.originalDateiname(),
+                    validated.groesseInBytes()
+            );
+        } catch (IllegalArgumentException ex) {
+            throw new DateiValidationException(ex.getMessage());
+        }
+        betreuer.addDatei(datei);
+        betreuerRepository.save(betreuer);
+        return datei;
+    }
+
+    public Informationsdatei findDatei(UUID betreuerId, String gespeicherterName) {
+        if (gespeicherterName == null || gespeicherterName.isBlank()) {
+            throw new DateiNotFoundException("Datei wurde nicht gefunden");
+        }
+        Betreuer betreuer = getById(betreuerId);
+        return betreuer.getDateien().stream()
+                .filter(datei -> gespeicherterName.equals(datei.getDateisystemPfad()))
+                .findFirst()
+                .orElseThrow(() -> new DateiNotFoundException("Datei wurde nicht gefunden"));
+    }
+
     public void addLink(UUID betreuerId, String url, String anzeigetext) {
         Betreuer betreuer = getById(betreuerId);
         betreuer.addLink(new Link(url, anzeigetext));
@@ -111,6 +162,35 @@ public class BetreuerService {
         Betreuer betreuer = getById(betreuerId);
         betreuer.removeLink(new Link(url, anzeigetext));
         betreuerRepository.save(betreuer);
+    }
+
+    private DateiUploadData validateUploadData(DateiUploadData data) {
+        if (data == null) {
+            throw new DateiValidationException("Datei-Daten fehlen");
+        }
+        if (data.inhalt() == null || data.inhalt().length == 0) {
+            throw new DateiValidationException("Datei ist leer");
+        }
+        if (data.groesseInBytes() > MAX_UPLOAD_BYTES) {
+            throw new DateiValidationException("Datei ist groesser als 10 MB");
+        }
+        if (data.originalDateiname() == null || data.originalDateiname().trim().isEmpty()) {
+            throw new DateiValidationException("Dateiname fehlt");
+        }
+        return data;
+    }
+
+    private Dateityp resolveDateityp(String dateiname) {
+        try {
+            return Dateityp.fromDateiname(dateiname);
+        } catch (IllegalArgumentException ex) {
+            throw new DateiValidationException(ex.getMessage());
+        }
+    }
+
+    private String resolveUploaderName() {
+        String login = currentUser.login();
+        return (login == null || login.isBlank()) ? "unbekannt" : login;
     }
 
 

@@ -6,6 +6,7 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 import org.springframework.web.servlet.ModelAndView;
 import wiegand.luca.ThesisIsComing.ApplicationService.exception.BetreuerNotFoundException;
+import wiegand.luca.ThesisIsComing.ApplicationService.exception.DateiNotFoundException;
 import wiegand.luca.ThesisIsComing.presentationDriving.exception.BetreuerListIsEmpty;
 
 @ControllerAdvice
@@ -21,6 +22,14 @@ public class BetreuerControllerAdvice {
 
     @ExceptionHandler(BetreuerListIsEmpty.class)
     public ModelAndView handleBetreuerListeKannNichtAngezeigtWerden(BetreuerListIsEmpty ex) {
+        ModelAndView mav = new ModelAndView("errors/404");
+        mav.setStatus(HttpStatus.NOT_FOUND);
+        mav.addObject("message", ex.getMessage());
+        return mav;
+    }
+
+    @ExceptionHandler(DateiNotFoundException.class)
+    public ModelAndView handleDateiNotFound(DateiNotFoundException ex) {
         ModelAndView mav = new ModelAndView("errors/404");
         mav.setStatus(HttpStatus.NOT_FOUND);
         mav.addObject("message", ex.getMessage());

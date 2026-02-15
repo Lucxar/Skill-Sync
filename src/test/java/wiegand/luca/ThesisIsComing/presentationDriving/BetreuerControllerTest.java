@@ -10,19 +10,24 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors;
+import org.springframework.mock.web.MockMultipartFile;
 import wiegand.luca.ThesisIsComing.ApplicationService.BetreuerService;
 import wiegand.luca.ThesisIsComing.ApplicationService.BetreuerThemenBeziehungService;
 import wiegand.luca.ThesisIsComing.ApplicationService.ThemaService;
 import wiegand.luca.ThesisIsComing.domainModel.Betreuer;
 import wiegand.luca.ThesisIsComing.domainModel.Thema;
+import wiegand.luca.ThesisIsComing.domainModel.valueObjects.Dateityp;
+import wiegand.luca.ThesisIsComing.domainModel.valueObjects.Informationsdatei;
 
 import java.util.List;
 import java.util.UUID;
+import java.time.LocalDateTime;
 
 import static org.mockito.Mockito.verify;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.multipart;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.model;
@@ -275,6 +280,58 @@ class BetreuerControllerTest {
         mvc.perform(post("/betreuer/{id}/loeschen", UUID.randomUUID())
                         .with(SecurityMockMvcRequestPostProcessors.user("student").roles("STUDIERENDE"))
                         .with(SecurityMockMvcRequestPostProcessors.csrf()))
+                .andExpect(status().isForbidden());
+    }
+
+    @Test
+    @DisplayName("POST /betreuer/{id}/dateien uploads and redirects")
+    void upload_datei_redirects() throws Exception {
+        UUID betreuerId = UUID.randomUUID();
+        MockMultipartFile file = new MockMultipartFile(
+                "datei",
+                "info.pdf",
+                "application/pdf",
+                "content".getBytes()
+        );
+        when(service.uploadDatei(any(UUID.class), any())).thenReturn(
+                new Informationsdatei(
+                        "Dokument",
+                        null,
+                        "anna",
+                        LocalDateTime.now(),
+                        "stored.pdf",
+                        Dateityp.PDF,
+                        "info.pdf",
+                        7L
+                )
+        );
+
+        mvc.perform(multipart("/betreuer/{id}/dateien", betreuerId)
+                        .file(file)
+                        .with(SecurityMockMvcRequestPostProcessors.user("admin").roles("ADMIN"))
+                        .with(SecurityMockMvcRequestPostProcessors.csrf())
+                        .param("titel", "Dokument")
+                        .param("beschreibung", ""))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl("/betreuer/" + betreuerId));
+    }
+
+    @Test
+    @DisplayName("POST /betreuer/{id}/dateien is forbidden for students")
+    void upload_datei_forbidden_for_students() throws Exception {
+        UUID betreuerId = UUID.randomUUID();
+        MockMultipartFile file = new MockMultipartFile(
+                "datei",
+                "info.pdf",
+                "application/pdf",
+                "content".getBytes()
+        );
+
+        mvc.perform(multipart("/betreuer/{id}/dateien", betreuerId)
+                        .file(file)
+                        .with(SecurityMockMvcRequestPostProcessors.user("student").roles("STUDIERENDE"))
+                        .with(SecurityMockMvcRequestPostProcessors.csrf())
+                        .param("titel", "Dokument"))
                 .andExpect(status().isForbidden());
     }
 }

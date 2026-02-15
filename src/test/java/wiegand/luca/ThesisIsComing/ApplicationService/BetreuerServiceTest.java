@@ -8,8 +8,12 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.junit.jupiter.MockitoExtension;
 import wiegand.luca.ThesisIsComing.ApplicationService.exception.BetreuerNotFoundException;
 import wiegand.luca.ThesisIsComing.ApplicationService.exception.BetreuerValidationException;
+import wiegand.luca.ThesisIsComing.ApplicationService.exception.DateiValidationException;
+import wiegand.luca.ThesisIsComing.ApplicationService.security.CurrentUser;
 import wiegand.luca.ThesisIsComing.domainModel.Betreuer;
 import wiegand.luca.ThesisIsComing.domainModel.exception.InvalidLinkException;
+import wiegand.luca.ThesisIsComing.domainModel.valueObjects.Dateityp;
+import wiegand.luca.ThesisIsComing.domainModel.valueObjects.Informationsdatei;
 import wiegand.luca.ThesisIsComing.domainModel.valueObjects.Link;
 
 import java.util.List;
@@ -20,9 +24,9 @@ import java.util.UUID;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import static org.mockito.Mockito.never;
 
 @ExtendWith(MockitoExtension.class)
 class BetreuerServiceTest {
@@ -30,11 +34,17 @@ class BetreuerServiceTest {
     @Mock
     private BetreuerRepository repo;
 
+    @Mock
+    private DateiSpeicher dateiSpeicher;
+
+    @Mock
+    private CurrentUser currentUser;
+
     private BetreuerService service;
 
     @BeforeEach
     void setup() {
-        service = new BetreuerService(repo);
+        service = new BetreuerService(repo, dateiSpeicher, currentUser);
     }
 
     @Test
@@ -151,5 +161,68 @@ class BetreuerServiceTest {
         service.deleteBetreuer(id);
 
         verify(repo).deleteById(id);
+    }
+
+    @Test
+    void uploadDatei_saves_metadata_and_file() {
+        UUID id = UUID.randomUUID();
+        Betreuer betreuer = new Betreuer(id, "Anna");
+        when(repo.findById(id)).thenReturn(Optional.of(betreuer));
+        when(repo.save(any(Betreuer.class))).thenAnswer(invocation -> invocation.getArgument(0));
+        when(dateiSpeicher.speichere(any(String.class), any(byte[].class))).thenReturn("stored.pdf");
+        when(currentUser.login()).thenReturn("anna");
+
+        DateiUploadData data = new DateiUploadData(
+                "Dokument",
+                "Beschreibung",
+                "info.pdf",
+                12L,
+                "content".getBytes()
+        );
+
+        Informationsdatei result = service.uploadDatei(id, data);
+
+        ArgumentCaptor<Betreuer> captor = ArgumentCaptor.forClass(Betreuer.class);
+        verify(repo).save(captor.capture());
+        assertThat(result.getDateityp()).isEqualTo(Dateityp.PDF);
+        assertThat(result.getOriginalDateiname()).isEqualTo("info.pdf");
+        assertThat(result.getGroesseInBytes()).isEqualTo(12L);
+        assertThat(captor.getValue().getDateien()).hasSize(1);
+    }
+
+    @Test
+    void uploadDatei_throws_when_file_too_large() {
+        UUID id = UUID.randomUUID();
+        when(repo.findById(id)).thenReturn(Optional.of(new Betreuer(id, "Anna")));
+        byte[] content = new byte[(10 * 1024 * 1024) + 1];
+
+        DateiUploadData data = new DateiUploadData(
+                "Dokument",
+                null,
+                "info.pdf",
+                content.length,
+                content
+        );
+
+        assertThatThrownBy(() -> service.uploadDatei(id, data))
+                .isInstanceOf(DateiValidationException.class);
+        verify(repo, never()).save(any(Betreuer.class));
+    }
+
+    @Test
+    void uploadDatei_throws_when_type_unknown() {
+        UUID id = UUID.randomUUID();
+        when(repo.findById(id)).thenReturn(Optional.of(new Betreuer(id, "Anna")));
+        DateiUploadData data = new DateiUploadData(
+                "Dokument",
+                null,
+                "info.txt",
+                5L,
+                "content".getBytes()
+        );
+
+        assertThatThrownBy(() -> service.uploadDatei(id, data))
+                .isInstanceOf(DateiValidationException.class);
+        verify(repo, never()).save(any(Betreuer.class));
     }
 }
