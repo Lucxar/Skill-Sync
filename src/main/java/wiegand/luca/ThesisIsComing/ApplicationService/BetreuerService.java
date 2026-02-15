@@ -35,6 +35,10 @@ public class BetreuerService {
         return betreuerRepository.save(betreuer);
     }
 
+    public java.util.Optional<Betreuer> findByGithubLogin(String githubLogin) {
+        return betreuerRepository.findByGithubLogin(githubLogin);
+    }
+
     public List<Thema> listThemenByBetreuer(UUID betreuerId) {
         Betreuer betreuer = getById(betreuerId);
         return betreuer.getThemen().stream().toList();
