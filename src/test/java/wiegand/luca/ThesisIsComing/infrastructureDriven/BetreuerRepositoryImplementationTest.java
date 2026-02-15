@@ -174,6 +174,82 @@ class BetreuerRepositoryImplementationTest extends TestPostgresContainer {
     }
 
     @Test
+    @DisplayName("findByNameContainsIgnoreCase returns matching Betreuer")
+    void findByNameContainsIgnoreCase_returns_matching_betreuer() {
+        UUID id1 = UUID.randomUUID();
+        UUID id2 = UUID.randomUUID();
+        jdbcTemplate.update(
+                "insert into betreuer (id, name, email, matrikelnummer) values (?, ?, ?, ?)",
+                id1, "Anna", null, null
+        );
+        jdbcTemplate.update(
+                "insert into betreuer (id, name, email, matrikelnummer) values (?, ?, ?, ?)",
+                id2, "Bernd", null, null
+        );
+
+        var result = betreuerRepository.findByNameContainsIgnoreCase("ann");
+
+        assertThat(result).extracting(Betreuer::getName)
+                .containsExactly("Anna");
+    }
+
+    @Test
+    @DisplayName("findByFachgebiet returns matching Betreuer")
+    void findByFachgebiet_returns_matching_betreuer() {
+        UUID id1 = UUID.randomUUID();
+        UUID id2 = UUID.randomUUID();
+        jdbcTemplate.update(
+                "insert into betreuer (id, name, email, matrikelnummer) values (?, ?, ?, ?)",
+                id1, "Anna", null, null
+        );
+        jdbcTemplate.update(
+                "insert into betreuer (id, name, email, matrikelnummer) values (?, ?, ?, ?)",
+                id2, "Bernd", null, null
+        );
+        jdbcTemplate.update(
+                "insert into betreuer_fachgebiet (bezeichnung, betreuer_id) values (?, ?)",
+                "AI", id1
+        );
+        jdbcTemplate.update(
+                "insert into betreuer_fachgebiet (bezeichnung, betreuer_id) values (?, ?)",
+                "Data", id2
+        );
+
+        var result = betreuerRepository.findByFachgebiet("ai");
+
+        assertThat(result).extracting(Betreuer::getName)
+                .containsExactly("Anna");
+    }
+
+    @Test
+    @DisplayName("findByNameContainsIgnoreCaseAndFachgebiet returns matching Betreuer")
+    void findByNameContainsIgnoreCaseAndFachgebiet_returns_matching_betreuer() {
+        UUID id1 = UUID.randomUUID();
+        UUID id2 = UUID.randomUUID();
+        jdbcTemplate.update(
+                "insert into betreuer (id, name, email, matrikelnummer) values (?, ?, ?, ?)",
+                id1, "Anna", null, null
+        );
+        jdbcTemplate.update(
+                "insert into betreuer (id, name, email, matrikelnummer) values (?, ?, ?, ?)",
+                id2, "Anna Maria", null, null
+        );
+        jdbcTemplate.update(
+                "insert into betreuer_fachgebiet (bezeichnung, betreuer_id) values (?, ?)",
+                "AI", id1
+        );
+        jdbcTemplate.update(
+                "insert into betreuer_fachgebiet (bezeichnung, betreuer_id) values (?, ?)",
+                "Data", id2
+        );
+
+        var result = betreuerRepository.findByNameContainsIgnoreCaseAndFachgebiet("anna", "ai");
+
+        assertThat(result).extracting(Betreuer::getId)
+                .containsExactly(id1);
+    }
+
+    @Test
     @DisplayName("deleteById removes Betreuer and linked data")
     void deleteById_removes_betreuer_and_links() {
         UUID id = UUID.randomUUID();

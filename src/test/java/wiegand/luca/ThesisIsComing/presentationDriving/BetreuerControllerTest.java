@@ -11,8 +11,10 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors;
 import org.springframework.mock.web.MockMultipartFile;
+import org.mockito.ArgumentCaptor;
 import wiegand.luca.ThesisIsComing.ApplicationService.BetreuerService;
 import wiegand.luca.ThesisIsComing.ApplicationService.BetreuerThemenBeziehungService;
+import wiegand.luca.ThesisIsComing.ApplicationService.SucheForm;
 import wiegand.luca.ThesisIsComing.ApplicationService.ThemaService;
 import wiegand.luca.ThesisIsComing.domainModel.Betreuer;
 import wiegand.luca.ThesisIsComing.domainModel.Thema;
@@ -35,6 +37,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.view;
 import static org.hamcrest.Matchers.containsString;
+import static org.assertj.core.api.Assertions.assertThat;
 
 @WebMvcTest(BetreuerController.class)
 @AutoConfigureMockMvc
@@ -58,13 +61,34 @@ class BetreuerControllerTest {
     @DisplayName("'/betreuer' renders a list of Betreuer into HTML '/betreuer/list'.")
     void list_view_renders_betreuer_model() throws Exception {
         Betreuer betreuer = new Betreuer(UUID.randomUUID(), "Anna");
-        when(service.listAll()).thenReturn(List.of(betreuer));
+        when(service.searchBetreuer(any(SucheForm.class))).thenReturn(List.of(betreuer));
 
         mvc.perform(get("/betreuer")
                         .with(SecurityMockMvcRequestPostProcessors.user("student").roles("STUDIERENDE")))
                 .andExpect(status().isOk())
                 .andExpect(view().name("betreuer/list"))
-                .andExpect(model().attributeExists("betreuer"));
+                .andExpect(model().attributeExists("betreuer"))
+                .andExpect(model().attributeExists("sucheForm"));
+    }
+
+    @Test
+    @DisplayName("'/betreuer' applies search parameters")
+    void list_view_applies_search_params() throws Exception {
+        Betreuer betreuer = new Betreuer(UUID.randomUUID(), "Anna");
+        when(service.searchBetreuer(any(SucheForm.class))).thenReturn(List.of(betreuer));
+
+        mvc.perform(get("/betreuer")
+                        .param("suchbegriff", "Ann")
+                        .param("fachgebiet", "AI")
+                        .with(SecurityMockMvcRequestPostProcessors.user("student").roles("STUDIERENDE")))
+                .andExpect(status().isOk())
+                .andExpect(view().name("betreuer/list"))
+                .andExpect(model().attributeExists("sucheForm"));
+
+        ArgumentCaptor<SucheForm> captor = ArgumentCaptor.forClass(SucheForm.class);
+        verify(service).searchBetreuer(captor.capture());
+        assertThat(captor.getValue().suchbegriff()).isEqualTo("Ann");
+        assertThat(captor.getValue().fachgebiet()).isEqualTo("AI");
     }
 
     @Test

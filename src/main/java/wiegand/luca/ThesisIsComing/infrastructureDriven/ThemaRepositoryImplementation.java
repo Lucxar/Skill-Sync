@@ -80,5 +80,32 @@ public class ThemaRepositoryImplementation implements ThemaRepository {
         return result;
     }
 
+    @Override
+    public List<Thema> findByTitelContainsIgnoreCase(String titel) {
+        List<Thema> result = new ArrayList<>();
+        for (ThemaDto dto : repository.findByTitelContainsIgnoreCase(titel)) {
+            result.add(Mapper.toThema(dto));
+        }
+        return result;
+    }
+
+    @Override
+    public List<Thema> findByFachgebiet(String fachgebiet) {
+        List<Thema> result = new ArrayList<>();
+        for (ThemaDto dto : repository.findByFachgebiet(fachgebiet)) {
+            result.add(Mapper.toThema(dto));
+        }
+        return result;
+    }
+
+    @Override
+    public List<Thema> findByTitelContainsIgnoreCaseAndFachgebiet(String titel, String fachgebiet) {
+        List<Thema> result = new ArrayList<>();
+        for (ThemaDto dto : repository.findByTitelContainsIgnoreCaseAndFachgebiet(titel, fachgebiet)) {
+            result.add(Mapper.toThema(dto));
+        }
+        return result;
+    }
+
 
 }

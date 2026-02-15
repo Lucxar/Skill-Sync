@@ -225,6 +225,82 @@ public class ThemaRepositoryImplementationTest extends TestPostgresContainer {
     }
 
     @Test
+    @DisplayName("findByTitelContainsIgnoreCase returns matching Themen")
+    void findByTitelContainsIgnoreCase_returns_matching_themen() {
+        UUID id1 = UUID.randomUUID();
+        UUID id2 = UUID.randomUUID();
+        jdbcTemplate.update(
+                "insert into thema (id, titel, beschreibung_markdown) values (?, ?, ?)",
+                id1, "Machine Learning", null
+        );
+        jdbcTemplate.update(
+                "insert into thema (id, titel, beschreibung_markdown) values (?, ?, ?)",
+                id2, "Software Engineering", null
+        );
+
+        var result = themaRepository.findByTitelContainsIgnoreCase("learning");
+
+        assertThat(result).extracting(Thema::getTitel)
+                .containsExactly("Machine Learning");
+    }
+
+    @Test
+    @DisplayName("findByFachgebiet returns matching Themen")
+    void findByFachgebiet_returns_matching_themen() {
+        UUID id1 = UUID.randomUUID();
+        UUID id2 = UUID.randomUUID();
+        jdbcTemplate.update(
+                "insert into thema (id, titel, beschreibung_markdown) values (?, ?, ?)",
+                id1, "Thema AI", null
+        );
+        jdbcTemplate.update(
+                "insert into thema (id, titel, beschreibung_markdown) values (?, ?, ?)",
+                id2, "Thema Data", null
+        );
+        jdbcTemplate.update(
+                "insert into thema_fachgebiet (bezeichnung, thema_id) values (?, ?)",
+                "AI", id1
+        );
+        jdbcTemplate.update(
+                "insert into thema_fachgebiet (bezeichnung, thema_id) values (?, ?)",
+                "Data", id2
+        );
+
+        var result = themaRepository.findByFachgebiet("ai");
+
+        assertThat(result).extracting(Thema::getTitel)
+                .containsExactly("Thema AI");
+    }
+
+    @Test
+    @DisplayName("findByTitelContainsIgnoreCaseAndFachgebiet returns matching Themen")
+    void findByTitelContainsIgnoreCaseAndFachgebiet_returns_matching_themen() {
+        UUID id1 = UUID.randomUUID();
+        UUID id2 = UUID.randomUUID();
+        jdbcTemplate.update(
+                "insert into thema (id, titel, beschreibung_markdown) values (?, ?, ?)",
+                id1, "AI Projekt", null
+        );
+        jdbcTemplate.update(
+                "insert into thema (id, titel, beschreibung_markdown) values (?, ?, ?)",
+                id2, "AI und Data", null
+        );
+        jdbcTemplate.update(
+                "insert into thema_fachgebiet (bezeichnung, thema_id) values (?, ?)",
+                "AI", id1
+        );
+        jdbcTemplate.update(
+                "insert into thema_fachgebiet (bezeichnung, thema_id) values (?, ?)",
+                "Data", id2
+        );
+
+        var result = themaRepository.findByTitelContainsIgnoreCaseAndFachgebiet("ai", "ai");
+
+        assertThat(result).extracting(Thema::getId)
+                .containsExactly(id1);
+    }
+
+    @Test
     @DisplayName("deleteById removes Thema and linked data")
     void deleteById_removes_thema_and_links() {
         UUID id = UUID.randomUUID();

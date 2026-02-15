@@ -6,6 +6,7 @@ import wiegand.luca.ThesisIsComing.ApplicationService.exception.ThemaNotFoundExc
 import wiegand.luca.ThesisIsComing.ApplicationService.exception.ThemaValidationException;
 import wiegand.luca.ThesisIsComing.domainModel.Betreuer;
 import wiegand.luca.ThesisIsComing.domainModel.Thema;
+import wiegand.luca.ThesisIsComing.domainModel.valueObjects.Fachgebiet;
 import wiegand.luca.ThesisIsComing.domainModel.valueObjects.Link;
 
 import java.util.List;
@@ -24,6 +25,27 @@ public class ThemaService {
     public List<Thema> listAll() {
         return StreamSupport.stream(repository.findAll().spliterator(), false)
                 .toList();
+    }
+
+    public List<Thema> searchThemen(SucheForm form) {
+        SucheForm criteria = form == null ? new SucheForm(null, null) : form;
+        String suchbegriff = criteria.normalizedSuchbegriff();
+        Fachgebiet fachgebiet = criteria.toFachgebiet();
+        boolean hasSuchbegriff = suchbegriff != null;
+        boolean hasFachgebiet = fachgebiet != null;
+        if (!hasSuchbegriff && !hasFachgebiet) {
+            return listAll();
+        }
+        if (hasSuchbegriff && hasFachgebiet) {
+            return repository.findByTitelContainsIgnoreCaseAndFachgebiet(
+                    suchbegriff,
+                    fachgebiet.getBezeichnung()
+            );
+        }
+        if (hasSuchbegriff) {
+            return repository.findByTitelContainsIgnoreCase(suchbegriff);
+        }
+        return repository.findByFachgebiet(fachgebiet.getBezeichnung());
     }
 
     public Thema getById(UUID id) {

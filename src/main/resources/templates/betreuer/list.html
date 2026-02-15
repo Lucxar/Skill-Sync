@@ -9,6 +9,14 @@
 <main>
     <section>
         <h1>Betreuerliste</h1>
+        <form th:action="@{/betreuer}" method="get" th:object="${sucheForm}">
+            <label for="suchbegriff">Suche</label>
+            <input id="suchbegriff" type="text" th:field="*{suchbegriff}" />
+            <label for="fachgebiet">Fachgebiet</label>
+            <input id="fachgebiet" type="text" th:field="*{fachgebiet}" />
+            <button type="submit">Anwenden</button>
+            <a th:href="@{/betreuer}">Zuruecksetzen</a>
+        </form>
         <div sec:authorize="hasAnyRole('ADMIN','BETREUER')">
             <a th:href="@{/betreuer/neu}">Neuen Betreuer anlegen</a>
         </div>

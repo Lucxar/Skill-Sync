@@ -63,6 +63,50 @@ class BetreuerServiceTest {
     }
 
     @Test
+    void searchBetreuer_returns_all_when_no_filters() {
+        Betreuer b1 = new Betreuer(UUID.randomUUID(), "Anna");
+        when(repo.findAll()).thenReturn(List.of(b1));
+
+        List<Betreuer> result = service.searchBetreuer(new SucheForm(null, null));
+
+        assertThat(result).containsExactly(b1);
+        verify(repo).findAll();
+    }
+
+    @Test
+    void searchBetreuer_filters_by_name() {
+        Betreuer b1 = new Betreuer(UUID.randomUUID(), "Anna");
+        when(repo.findByNameContainsIgnoreCase("Ann")).thenReturn(List.of(b1));
+
+        List<Betreuer> result = service.searchBetreuer(new SucheForm("Ann", null));
+
+        assertThat(result).containsExactly(b1);
+        verify(repo).findByNameContainsIgnoreCase("Ann");
+    }
+
+    @Test
+    void searchBetreuer_filters_by_fachgebiet() {
+        Betreuer b1 = new Betreuer(UUID.randomUUID(), "Anna");
+        when(repo.findByFachgebiet("AI")).thenReturn(List.of(b1));
+
+        List<Betreuer> result = service.searchBetreuer(new SucheForm(null, "AI"));
+
+        assertThat(result).containsExactly(b1);
+        verify(repo).findByFachgebiet("AI");
+    }
+
+    @Test
+    void searchBetreuer_filters_by_name_and_fachgebiet() {
+        Betreuer b1 = new Betreuer(UUID.randomUUID(), "Anna");
+        when(repo.findByNameContainsIgnoreCaseAndFachgebiet("Ann", "AI")).thenReturn(List.of(b1));
+
+        List<Betreuer> result = service.searchBetreuer(new SucheForm("Ann", "AI"));
+
+        assertThat(result).containsExactly(b1);
+        verify(repo).findByNameContainsIgnoreCaseAndFachgebiet("Ann", "AI");
+    }
+
+    @Test
     void getById_throws_when_missing() {
         when(repo.findById(any(UUID.class))).thenReturn(Optional.empty());
         assertThatThrownBy(() -> service.getById(UUID.randomUUID()))

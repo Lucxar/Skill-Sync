@@ -62,7 +62,9 @@ public class DateiController {
         Node document = parser.parse(markdown);
         HtmlRenderer renderer = HtmlRenderer.builder().build();
         String html = renderer.render(document);
-        String safeHtml = Jsoup.parse(html).select("script").remove().body().html();
+        var sanitized = Jsoup.parse(html);
+        sanitized.select("script").remove();
+        String safeHtml = sanitized.body().html();
         model.addAttribute("datei", datei);
         model.addAttribute("contentHtml", safeHtml);
         return "datei/markdown";

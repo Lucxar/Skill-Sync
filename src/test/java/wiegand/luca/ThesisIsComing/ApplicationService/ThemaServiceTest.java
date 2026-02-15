@@ -60,6 +60,54 @@ public class ThemaServiceTest {
     }
 
     @Test
+    @DisplayName("searchThemen returns all when no filters")
+    void searchThemen_returns_all_when_no_filters() {
+        Thema t1 = new Thema(UUID.randomUUID(), "Thema 1");
+        when(repo.findAll()).thenReturn(List.of(t1));
+
+        List<Thema> result = service.searchThemen(new SucheForm(null, null));
+
+        assertThat(result).containsExactly(t1);
+        verify(repo).findAll();
+    }
+
+    @Test
+    @DisplayName("searchThemen filters by titel")
+    void searchThemen_filters_by_titel() {
+        Thema t1 = new Thema(UUID.randomUUID(), "Thema 1");
+        when(repo.findByTitelContainsIgnoreCase("Thema")).thenReturn(List.of(t1));
+
+        List<Thema> result = service.searchThemen(new SucheForm("Thema", null));
+
+        assertThat(result).containsExactly(t1);
+        verify(repo).findByTitelContainsIgnoreCase("Thema");
+    }
+
+    @Test
+    @DisplayName("searchThemen filters by fachgebiet")
+    void searchThemen_filters_by_fachgebiet() {
+        Thema t1 = new Thema(UUID.randomUUID(), "Thema 1");
+        when(repo.findByFachgebiet("AI")).thenReturn(List.of(t1));
+
+        List<Thema> result = service.searchThemen(new SucheForm(null, "AI"));
+
+        assertThat(result).containsExactly(t1);
+        verify(repo).findByFachgebiet("AI");
+    }
+
+    @Test
+    @DisplayName("searchThemen filters by titel and fachgebiet")
+    void searchThemen_filters_by_titel_and_fachgebiet() {
+        Thema t1 = new Thema(UUID.randomUUID(), "Thema 1");
+        when(repo.findByTitelContainsIgnoreCaseAndFachgebiet("Thema", "AI")).thenReturn(List.of(t1));
+
+        List<Thema> result = service.searchThemen(new SucheForm("Thema", "AI"));
+
+        assertThat(result).containsExactly(t1);
+        verify(repo).findByTitelContainsIgnoreCaseAndFachgebiet("Thema", "AI");
+    }
+
+    @Test
     @DisplayName("getById returns the correct Thema")
     void getById_returns_correct_Thema() {
 

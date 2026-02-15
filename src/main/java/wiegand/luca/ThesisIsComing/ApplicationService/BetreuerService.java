@@ -9,6 +9,7 @@ import wiegand.luca.ThesisIsComing.ApplicationService.security.CurrentUser;
 import wiegand.luca.ThesisIsComing.domainModel.Betreuer;
 import wiegand.luca.ThesisIsComing.domainModel.Thema;
 import wiegand.luca.ThesisIsComing.domainModel.valueObjects.Dateityp;
+import wiegand.luca.ThesisIsComing.domainModel.valueObjects.Fachgebiet;
 import wiegand.luca.ThesisIsComing.domainModel.valueObjects.Informationsdatei;
 import wiegand.luca.ThesisIsComing.domainModel.valueObjects.Kontaktinformationen;
 import wiegand.luca.ThesisIsComing.domainModel.valueObjects.Link;
@@ -39,6 +40,27 @@ public class BetreuerService {
     public List<Betreuer> listAll() {
         return StreamSupport.stream(betreuerRepository.findAll().spliterator(), false)
                 .toList();
+    }
+
+    public List<Betreuer> searchBetreuer(SucheForm form) {
+        SucheForm criteria = form == null ? new SucheForm(null, null) : form;
+        String suchbegriff = criteria.normalizedSuchbegriff();
+        Fachgebiet fachgebiet = criteria.toFachgebiet();
+        boolean hasSuchbegriff = suchbegriff != null;
+        boolean hasFachgebiet = fachgebiet != null;
+        if (!hasSuchbegriff && !hasFachgebiet) {
+            return listAll();
+        }
+        if (hasSuchbegriff && hasFachgebiet) {
+            return betreuerRepository.findByNameContainsIgnoreCaseAndFachgebiet(
+                    suchbegriff,
+                    fachgebiet.getBezeichnung()
+            );
+        }
+        if (hasSuchbegriff) {
+            return betreuerRepository.findByNameContainsIgnoreCase(suchbegriff);
+        }
+        return betreuerRepository.findByFachgebiet(fachgebiet.getBezeichnung());
     }
 
 

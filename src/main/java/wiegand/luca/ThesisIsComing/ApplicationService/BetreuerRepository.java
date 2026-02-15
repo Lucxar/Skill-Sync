@@ -19,4 +19,8 @@ public interface BetreuerRepository {
     List<Thema> findThemenByBetreuerIdOrderByTitel(UUID betreuerId);
     long countThemenByBetreuerId(UUID betreuerId);
     boolean existsBetreuerThema(UUID betreuerId, UUID themaId);
+
+    List<Betreuer> findByNameContainsIgnoreCase(String name);
+    List<Betreuer> findByFachgebiet(String fachgebiet);
+    List<Betreuer> findByNameContainsIgnoreCaseAndFachgebiet(String name, String fachgebiet);
 }

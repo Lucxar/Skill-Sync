@@ -11,8 +11,10 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors;
+import org.mockito.ArgumentCaptor;
 import wiegand.luca.ThesisIsComing.ApplicationService.BetreuerService;
 import wiegand.luca.ThesisIsComing.ApplicationService.BetreuerThemenBeziehungService;
+import wiegand.luca.ThesisIsComing.ApplicationService.SucheForm;
 import wiegand.luca.ThesisIsComing.ApplicationService.ThemaService;
 import wiegand.luca.ThesisIsComing.ApplicationService.exception.ThemaNotFoundException;
 import wiegand.luca.ThesisIsComing.presentationDriving.exception.ThemaListIsEmpty;
@@ -33,6 +35,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.view;
 import static org.hamcrest.Matchers.containsString;
+import static org.assertj.core.api.Assertions.assertThat;
 
 @WebMvcTest(ThemaController.class)
 @AutoConfigureMockMvc
@@ -58,13 +61,34 @@ public class ThemaControllerTest {
     void themen_returns_correct_view() throws Exception {
 
         Thema t1 = new Thema(UUID.randomUUID(), "Thema 1");
-        when(service.listAll()).thenReturn(List.of(t1));
+        when(service.searchThemen(any(SucheForm.class))).thenReturn(List.of(t1));
 
         mvc.perform(get("/themen")
                         .with(SecurityMockMvcRequestPostProcessors.user("student").roles("STUDIERENDE")))
                 .andExpect(status().isOk())
                 .andExpect(view().name("thema/list"))
-                .andExpect(model().attributeExists("themen"));
+                .andExpect(model().attributeExists("themen"))
+                .andExpect(model().attributeExists("sucheForm"));
+    }
+
+    @Test
+    @DisplayName("/themen applies search parameters")
+    void themen_applies_search_params() throws Exception {
+        Thema t1 = new Thema(UUID.randomUUID(), "Thema 1");
+        when(service.searchThemen(any(SucheForm.class))).thenReturn(List.of(t1));
+
+        mvc.perform(get("/themen")
+                        .param("suchbegriff", "Thema")
+                        .param("fachgebiet", "AI")
+                        .with(SecurityMockMvcRequestPostProcessors.user("student").roles("STUDIERENDE")))
+                .andExpect(status().isOk())
+                .andExpect(view().name("thema/list"))
+                .andExpect(model().attributeExists("sucheForm"));
+
+        ArgumentCaptor<SucheForm> captor = ArgumentCaptor.forClass(SucheForm.class);
+        verify(service).searchThemen(captor.capture());
+        assertThat(captor.getValue().suchbegriff()).isEqualTo("Thema");
+        assertThat(captor.getValue().fachgebiet()).isEqualTo("AI");
     }
 
     @Test
@@ -284,7 +308,7 @@ public class ThemaControllerTest {
     @Test
     @DisplayName("/themen returns 404 when list is empty")
     void themen_returns_404_when_list_empty() throws Exception {
-        when(service.listAll()).thenReturn(List.of());
+        when(service.searchThemen(any(SucheForm.class))).thenReturn(List.of());
 
         mvc.perform(get("/themen")
                         .with(SecurityMockMvcRequestPostProcessors.user("student").roles("STUDIERENDE")))

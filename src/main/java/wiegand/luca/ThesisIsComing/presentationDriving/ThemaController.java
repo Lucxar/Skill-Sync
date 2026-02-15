@@ -4,6 +4,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -13,6 +14,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import jakarta.validation.Valid;
 import wiegand.luca.ThesisIsComing.ApplicationService.BetreuerService;
 import wiegand.luca.ThesisIsComing.ApplicationService.BetreuerThemenBeziehungService;
+import wiegand.luca.ThesisIsComing.ApplicationService.SucheForm;
 import wiegand.luca.ThesisIsComing.ApplicationService.ThemaService;
 import wiegand.luca.ThesisIsComing.ApplicationService.exception.ThemaDeleteNotAllowedException;
 import wiegand.luca.ThesisIsComing.ApplicationService.exception.ThemaValidationException;
@@ -37,14 +39,16 @@ public class ThemaController {
     }
 
     @GetMapping("/themen")
-    public String getAllThemen(Model model) {
-        var themen = service.listAll();
-        if (themen.isEmpty()) {
+    public String getAllThemen(@ModelAttribute("sucheForm") SucheForm sucheForm, Model model) {
+        SucheForm criteria = sucheForm == null ? new SucheForm(null, null) : sucheForm;
+        var themen = service.searchThemen(criteria);
+        if (themen.isEmpty() && criteria.isEmpty()) {
             throw new wiegand.luca.ThesisIsComing.presentationDriving.exception.ThemaListIsEmpty(
                     "Keine Themen gefunden"
             );
         }
         model.addAttribute("themen", themen);
+        model.addAttribute("sucheForm", criteria);
         return "thema/list";
     }
 

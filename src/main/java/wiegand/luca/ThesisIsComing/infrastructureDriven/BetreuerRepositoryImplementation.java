@@ -92,6 +92,33 @@ public class BetreuerRepositoryImplementation implements BetreuerRepository {
         return dataRepository.existsBetreuerThema(betreuerId, themaId);
     }
 
+    @Override
+    public List<Betreuer> findByNameContainsIgnoreCase(String name) {
+        List<Betreuer> result = new ArrayList<>();
+        for (BetreuerDto dto : dataRepository.findByNameContainsIgnoreCase(name)) {
+            result.add(Mapper.toBetreuer(dto));
+        }
+        return result;
+    }
+
+    @Override
+    public List<Betreuer> findByFachgebiet(String fachgebiet) {
+        List<Betreuer> result = new ArrayList<>();
+        for (BetreuerDto dto : dataRepository.findByFachgebiet(fachgebiet)) {
+            result.add(Mapper.toBetreuer(dto));
+        }
+        return result;
+    }
+
+    @Override
+    public List<Betreuer> findByNameContainsIgnoreCaseAndFachgebiet(String name, String fachgebiet) {
+        List<Betreuer> result = new ArrayList<>();
+        for (BetreuerDto dto : dataRepository.findByNameContainsIgnoreCaseAndFachgebiet(name, fachgebiet)) {
+            result.add(Mapper.toBetreuer(dto));
+        }
+        return result;
+    }
+
     
 
 

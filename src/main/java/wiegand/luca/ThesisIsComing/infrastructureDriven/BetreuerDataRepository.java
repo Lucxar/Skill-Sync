@@ -34,4 +34,17 @@ public interface BetreuerDataRepository extends CrudRepository<BetreuerDto, UUID
 
     @Query("SELECT EXISTS(SELECT 1 FROM betreuer_thema bt WHERE bt.betreuer_id = :betreuerId AND bt.thema_id = :themaId)")
     boolean existsBetreuerThema(@Param("betreuerId") UUID betreuerId, @Param("themaId") UUID themaId);
+
+    @Query("SELECT DISTINCT b.* FROM betreuer b WHERE LOWER(b.name) LIKE LOWER(CONCAT('%', :name, '%'))")
+    List<BetreuerDto> findByNameContainsIgnoreCase(@Param("name") String name);
+
+    @Query("SELECT DISTINCT b.* FROM betreuer b JOIN betreuer_fachgebiet bf ON bf.betreuer_id = b.id "
+            + "WHERE LOWER(bf.bezeichnung) = LOWER(:fachgebiet)")
+    List<BetreuerDto> findByFachgebiet(@Param("fachgebiet") String fachgebiet);
+
+    @Query("SELECT DISTINCT b.* FROM betreuer b JOIN betreuer_fachgebiet bf ON bf.betreuer_id = b.id "
+            + "WHERE LOWER(b.name) LIKE LOWER(CONCAT('%', :name, '%')) "
+            + "AND LOWER(bf.bezeichnung) = LOWER(:fachgebiet)")
+    List<BetreuerDto> findByNameContainsIgnoreCaseAndFachgebiet(@Param("name") String name,
+                                                                @Param("fachgebiet") String fachgebiet);
 }

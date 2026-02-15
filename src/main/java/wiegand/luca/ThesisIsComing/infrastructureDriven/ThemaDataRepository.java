@@ -23,4 +23,17 @@ public interface ThemaDataRepository extends CrudRepository<ThemaDto, UUID> {
 
     @Query("SELECT b.* FROM betreuer b JOIN betreuer_thema bt ON bt.betreuer_id = b.id WHERE bt.thema_id = :themaId ORDER BY b.name")
     List<BetreuerDto> findBetreuerByThemaIdOrderByName(@Param("themaId") UUID themaId);
+
+    @Query("SELECT DISTINCT t.* FROM thema t WHERE LOWER(t.titel) LIKE LOWER(CONCAT('%', :titel, '%'))")
+    List<ThemaDto> findByTitelContainsIgnoreCase(@Param("titel") String titel);
+
+    @Query("SELECT DISTINCT t.* FROM thema t JOIN thema_fachgebiet tf ON tf.thema_id = t.id "
+            + "WHERE LOWER(tf.bezeichnung) = LOWER(:fachgebiet)")
+    List<ThemaDto> findByFachgebiet(@Param("fachgebiet") String fachgebiet);
+
+    @Query("SELECT DISTINCT t.* FROM thema t JOIN thema_fachgebiet tf ON tf.thema_id = t.id "
+            + "WHERE LOWER(t.titel) LIKE LOWER(CONCAT('%', :titel, '%')) "
+            + "AND LOWER(tf.bezeichnung) = LOWER(:fachgebiet)")
+    List<ThemaDto> findByTitelContainsIgnoreCaseAndFachgebiet(@Param("titel") String titel,
+                                                              @Param("fachgebiet") String fachgebiet);
 }

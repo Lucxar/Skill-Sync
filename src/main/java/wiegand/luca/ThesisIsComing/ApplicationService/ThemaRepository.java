@@ -19,4 +19,8 @@ public interface ThemaRepository {
     List<Betreuer> findBetreuerByThemaId(UUID themaId);
     List<Betreuer> findBetreuerByThemaIdOrderByName(UUID themaId);
 
+    List<Thema> findByTitelContainsIgnoreCase(String titel);
+    List<Thema> findByFachgebiet(String fachgebiet);
+    List<Thema> findByTitelContainsIgnoreCaseAndFachgebiet(String titel, String fachgebiet);
+
 }
