@@ -11,6 +11,8 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import wiegand.luca.ThesisIsComing.ApplicationService.BetreuerService;
 import wiegand.luca.ThesisIsComing.ApplicationService.BetreuerThemenBeziehungService;
 import wiegand.luca.ThesisIsComing.ApplicationService.ThemaService;
+import wiegand.luca.ThesisIsComing.domainModel.exception.InvalidLinkException;
+import wiegand.luca.ThesisIsComing.domainModel.exception.LinkNotFoundException;
 
 import java.util.UUID;
 
@@ -43,9 +45,7 @@ public class ThemaController {
 
     @GetMapping("/themen/{id}")
     public String getThemaById(@PathVariable UUID id, Model model) {
-        model.addAttribute("thema", service.getById(id));
-        model.addAttribute("betreuer", service.findBetreuerByThemaIdOrderByName(id));
-        model.addAttribute("allBetreuer", betreuerService.listAll());
+        populateDetailModel(id, model);
         return "thema/detail";
     }
 
@@ -54,5 +54,50 @@ public class ThemaController {
     public RedirectView assignBetreuer(@PathVariable UUID id, @RequestParam UUID betreuerId) {
         beziehungService.assignBetreuerToThema(id, betreuerId);
         return new RedirectView("/themen/" + id);
+    }
+
+    @PostMapping("/themen/{id}/links")
+    @PreAuthorize("hasAnyRole('ADMIN','BETREUER')")
+    public String addLink(@PathVariable UUID id, LinkForm form, Model model) {
+        try {
+            service.addLink(id, form.url(), form.anzeigetext());
+            return "redirect:/themen/" + id;
+        } catch (InvalidLinkException ex) {
+            populateDetailModel(id, model);
+            model.addAttribute("linkError", ex.getMessage());
+            return "thema/detail";
+        }
+    }
+
+    @PostMapping("/themen/{id}/links/update")
+    @PreAuthorize("hasAnyRole('ADMIN','BETREUER')")
+    public String updateLink(@PathVariable UUID id, LinkUpdateForm form, Model model) {
+        try {
+            service.updateLink(id, form.oldUrl(), form.oldAnzeigetext(), form.url(), form.anzeigetext());
+            return "redirect:/themen/" + id;
+        } catch (InvalidLinkException | LinkNotFoundException ex) {
+            populateDetailModel(id, model);
+            model.addAttribute("linkError", ex.getMessage());
+            return "thema/detail";
+        }
+    }
+
+    @PostMapping("/themen/{id}/links/delete")
+    @PreAuthorize("hasAnyRole('ADMIN','BETREUER')")
+    public String deleteLink(@PathVariable UUID id, LinkForm form, Model model) {
+        try {
+            service.removeLink(id, form.url(), form.anzeigetext());
+            return "redirect:/themen/" + id;
+        } catch (InvalidLinkException | LinkNotFoundException ex) {
+            populateDetailModel(id, model);
+            model.addAttribute("linkError", ex.getMessage());
+            return "thema/detail";
+        }
+    }
+
+    private void populateDetailModel(UUID id, Model model) {
+        model.addAttribute("thema", service.getById(id));
+        model.addAttribute("betreuer", service.findBetreuerByThemaIdOrderByName(id));
+        model.addAttribute("allBetreuer", betreuerService.listAll());
     }
 }

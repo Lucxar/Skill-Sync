@@ -115,6 +115,69 @@ public class ThemaControllerTest {
                 .andExpect(status().isForbidden());
     }
 
+    @Test
+    @DisplayName("/themen/{id}/links adds a link and redirects")
+    @WithMockUser(roles = "ADMIN")
+    void add_link_redirects() throws Exception {
+        UUID themaId = UUID.randomUUID();
+
+        mvc.perform(post("/themen/{id}/links", themaId)
+                        .with(SecurityMockMvcRequestPostProcessors.csrf())
+                        .param("url", "https://example.com")
+                        .param("anzeigetext", "Beispiel"))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl("/themen/" + themaId));
+
+        verify(service).addLink(themaId, "https://example.com", "Beispiel");
+    }
+
+    @Test
+    @DisplayName("/themen/{id}/links/update updates a link and redirects")
+    @WithMockUser(roles = "ADMIN")
+    void update_link_redirects() throws Exception {
+        UUID themaId = UUID.randomUUID();
+
+        mvc.perform(post("/themen/{id}/links/update", themaId)
+                        .with(SecurityMockMvcRequestPostProcessors.csrf())
+                        .param("oldUrl", "https://old")
+                        .param("oldAnzeigetext", "Alt")
+                        .param("url", "https://neu")
+                        .param("anzeigetext", "Neu"))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl("/themen/" + themaId));
+
+        verify(service).updateLink(themaId, "https://old", "Alt", "https://neu", "Neu");
+    }
+
+    @Test
+    @DisplayName("/themen/{id}/links/delete deletes a link and redirects")
+    @WithMockUser(roles = "ADMIN")
+    void delete_link_redirects() throws Exception {
+        UUID themaId = UUID.randomUUID();
+
+        mvc.perform(post("/themen/{id}/links/delete", themaId)
+                        .with(SecurityMockMvcRequestPostProcessors.csrf())
+                        .param("url", "https://example.com")
+                        .param("anzeigetext", "Beispiel"))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl("/themen/" + themaId));
+
+        verify(service).removeLink(themaId, "https://example.com", "Beispiel");
+    }
+
+    @Test
+    @DisplayName("/themen/{id}/links is forbidden for students")
+    @WithMockUser(roles = "STUDIERENDE")
+    void add_link_forbidden_for_students() throws Exception {
+        UUID themaId = UUID.randomUUID();
+
+        mvc.perform(post("/themen/{id}/links", themaId)
+                        .with(SecurityMockMvcRequestPostProcessors.csrf())
+                        .param("url", "https://example.com")
+                        .param("anzeigetext", "Beispiel"))
+                .andExpect(status().isForbidden());
+    }
+
 
     @Test
     @DisplayName("/themen returns 404 when list is empty")

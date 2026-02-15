@@ -12,6 +12,8 @@ import wiegand.luca.ThesisIsComing.ApplicationService.BetreuerService;
 import wiegand.luca.ThesisIsComing.ApplicationService.BetreuerThemenBeziehungService;
 import wiegand.luca.ThesisIsComing.ApplicationService.ThemaService;
 import wiegand.luca.ThesisIsComing.domainModel.Betreuer;
+import wiegand.luca.ThesisIsComing.domainModel.exception.InvalidLinkException;
+import wiegand.luca.ThesisIsComing.domainModel.exception.LinkNotFoundException;
 import wiegand.luca.ThesisIsComing.presentationDriving.exception.BetreuerListIsEmpty;
 
 import java.util.UUID;
@@ -52,10 +54,7 @@ public class BetreuerController {
 
     @GetMapping("/betreuer/{id}")
     public String getBetreuerById(@PathVariable UUID id, Model model) {
-        Betreuer betreuer = service.getById(id);
-        model.addAttribute("betreuer", betreuer);
-        model.addAttribute("themen", service.findThemenByBetreuerIdOrderByTitel(id));
-        model.addAttribute("allThemen", themaService.listAll());
+        populateDetailModel(id, model);
         return "betreuer/detail";
     }
 
@@ -64,6 +63,52 @@ public class BetreuerController {
     public RedirectView assignThema(@PathVariable UUID id, @RequestParam UUID themaId) {
         beziehungService.assignThemaToBetreuer(id, themaId);
         return new RedirectView("/betreuer/" + id);
+    }
+
+    @PostMapping("/betreuer/{id}/links")
+    @PreAuthorize("hasAnyRole('ADMIN','BETREUER')")
+    public String addLink(@PathVariable UUID id, LinkForm form, Model model) {
+        try {
+            service.addLink(id, form.url(), form.anzeigetext());
+            return "redirect:/betreuer/" + id;
+        } catch (InvalidLinkException ex) {
+            populateDetailModel(id, model);
+            model.addAttribute("linkError", ex.getMessage());
+            return "betreuer/detail";
+        }
+    }
+
+    @PostMapping("/betreuer/{id}/links/update")
+    @PreAuthorize("hasAnyRole('ADMIN','BETREUER')")
+    public String updateLink(@PathVariable UUID id, LinkUpdateForm form, Model model) {
+        try {
+            service.updateLink(id, form.oldUrl(), form.oldAnzeigetext(), form.url(), form.anzeigetext());
+            return "redirect:/betreuer/" + id;
+        } catch (InvalidLinkException | LinkNotFoundException ex) {
+            populateDetailModel(id, model);
+            model.addAttribute("linkError", ex.getMessage());
+            return "betreuer/detail";
+        }
+    }
+
+    @PostMapping("/betreuer/{id}/links/delete")
+    @PreAuthorize("hasAnyRole('ADMIN','BETREUER')")
+    public String deleteLink(@PathVariable UUID id, LinkForm form, Model model) {
+        try {
+            service.removeLink(id, form.url(), form.anzeigetext());
+            return "redirect:/betreuer/" + id;
+        } catch (InvalidLinkException | LinkNotFoundException ex) {
+            populateDetailModel(id, model);
+            model.addAttribute("linkError", ex.getMessage());
+            return "betreuer/detail";
+        }
+    }
+
+    private void populateDetailModel(UUID id, Model model) {
+        Betreuer betreuer = service.getById(id);
+        model.addAttribute("betreuer", betreuer);
+        model.addAttribute("themen", service.findThemenByBetreuerIdOrderByTitel(id));
+        model.addAttribute("allThemen", themaService.listAll());
     }
 
 

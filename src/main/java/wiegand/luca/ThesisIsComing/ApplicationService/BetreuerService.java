@@ -5,6 +5,7 @@ import org.springframework.stereotype.Service;
 import wiegand.luca.ThesisIsComing.ApplicationService.exception.BetreuerNotFoundException;
 import wiegand.luca.ThesisIsComing.domainModel.Betreuer;
 import wiegand.luca.ThesisIsComing.domainModel.Thema;
+import wiegand.luca.ThesisIsComing.domainModel.valueObjects.Link;
 
 import java.util.List;
 import java.util.UUID;
@@ -62,6 +63,28 @@ public class BetreuerService {
 
     public boolean existsBetreuerThema(UUID betreuerId, UUID themaId) {
         return betreuerRepository.existsBetreuerThema(betreuerId, themaId);
+    }
+
+    public void addLink(UUID betreuerId, String url, String anzeigetext) {
+        Betreuer betreuer = getById(betreuerId);
+        betreuer.addLink(new Link(url, anzeigetext));
+        betreuerRepository.save(betreuer);
+    }
+
+    public void updateLink(UUID betreuerId,
+                           String oldUrl,
+                           String oldAnzeigetext,
+                           String newUrl,
+                           String newAnzeigetext) {
+        Betreuer betreuer = getById(betreuerId);
+        betreuer.updateLink(new Link(oldUrl, oldAnzeigetext), new Link(newUrl, newAnzeigetext));
+        betreuerRepository.save(betreuer);
+    }
+
+    public void removeLink(UUID betreuerId, String url, String anzeigetext) {
+        Betreuer betreuer = getById(betreuerId);
+        betreuer.removeLink(new Link(url, anzeigetext));
+        betreuerRepository.save(betreuer);
     }
 
 

@@ -15,9 +15,11 @@ import wiegand.luca.ThesisIsComing.ApplicationService.ThemaRepository;
 import wiegand.luca.ThesisIsComing.TestPostgresContainer;
 import wiegand.luca.ThesisIsComing.domainModel.Betreuer;
 import wiegand.luca.ThesisIsComing.domainModel.Thema;
+import wiegand.luca.ThesisIsComing.domainModel.valueObjects.Link;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.UUID;
 import java.util.stream.StreamSupport;
 
@@ -73,6 +75,38 @@ public class ThemaRepositoryImplementationTest extends TestPostgresContainer {
         assertThat(saved.getId()).isEqualTo(id);
         assertThat(loaded).isPresent();
         assertThat(loaded.get().getTitel()).isEqualTo("Neu");
+    }
+
+    @Test
+    @DisplayName("save persists links for Thema")
+    void save_persists_links() {
+        UUID id = UUID.randomUUID();
+        Thema thema = new Thema(
+                id,
+                "Titel 1",
+                null,
+                Set.of(),
+                Set.of(),
+                Set.of(),
+                Set.of(new Link("https://example.com", "Beispiel")),
+                Set.of()
+        );
+
+        themaRepository.save(thema);
+
+        Integer count = jdbcTemplate.queryForObject(
+                "select count(*) from thema_link where thema_id = ?",
+                Integer.class,
+                id
+        );
+        assertThat(count).isEqualTo(1);
+
+        var row = jdbcTemplate.queryForMap(
+                "select url, anzeigetext from thema_link where thema_id = ?",
+                id
+        );
+        assertThat(row.get("url")).isEqualTo("https://example.com");
+        assertThat(row.get("anzeigetext")).isEqualTo("Beispiel");
     }
 
     @Test

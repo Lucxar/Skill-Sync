@@ -16,6 +16,7 @@ import wiegand.luca.ThesisIsComing.TestPostgresContainer;
 import wiegand.luca.ThesisIsComing.domainModel.Betreuer;
 import wiegand.luca.ThesisIsComing.domainModel.Thema;
 import wiegand.luca.ThesisIsComing.domainModel.valueObjects.Kontaktinformationen;
+import wiegand.luca.ThesisIsComing.domainModel.valueObjects.Link;
 
 import java.util.Optional;
 import java.util.Set;
@@ -68,6 +69,37 @@ class BetreuerRepositoryImplementationTest extends TestPostgresContainer {
         assertThat(saved.getId()).isEqualTo(id);
         assertThat(loaded).isPresent();
         assertThat(loaded.get().getName()).isEqualTo("Anna");
+    }
+
+    @Test
+    @DisplayName("save persists links for Betreuer")
+    void save_persists_links() {
+        UUID id = UUID.randomUUID();
+        Kontaktinformationen kontakt = new Kontaktinformationen("a@b.de", "M-1");
+        Betreuer betreuer = new Betreuer(
+                id,
+                "Anna",
+                kontakt,
+                Set.of(),
+                Set.of(),
+                Set.of(new Link("https://example.com", "Beispiel"))
+        );
+
+        betreuerRepository.save(betreuer);
+
+        Integer count = jdbcTemplate.queryForObject(
+                "select count(*) from betreuer_link where betreuer_id = ?",
+                Integer.class,
+                id
+        );
+        assertThat(count).isEqualTo(1);
+
+        var row = jdbcTemplate.queryForMap(
+                "select url, anzeigetext from betreuer_link where betreuer_id = ?",
+                id
+        );
+        assertThat(row.get("url")).isEqualTo("https://example.com");
+        assertThat(row.get("anzeigetext")).isEqualTo("Beispiel");
     }
 
     @Test
@@ -136,6 +168,9 @@ class BetreuerRepositoryImplementationTest extends TestPostgresContainer {
 
     @BeforeEach
     void clearTables() {
+        jdbcTemplate.update("delete from betreuer_link");
+        jdbcTemplate.update("delete from betreuer_informationsdatei");
+        jdbcTemplate.update("delete from betreuer_fachgebiet");
         jdbcTemplate.update("delete from betreuer_thema");
         jdbcTemplate.update("delete from betreuer");
         jdbcTemplate.update("delete from thema");

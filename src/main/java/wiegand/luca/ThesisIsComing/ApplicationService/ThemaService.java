@@ -4,6 +4,7 @@ import org.springframework.stereotype.Service;
 import wiegand.luca.ThesisIsComing.ApplicationService.exception.ThemaNotFoundException;
 import wiegand.luca.ThesisIsComing.domainModel.Betreuer;
 import wiegand.luca.ThesisIsComing.domainModel.Thema;
+import wiegand.luca.ThesisIsComing.domainModel.valueObjects.Link;
 
 import java.util.List;
 import java.util.UUID;
@@ -46,6 +47,28 @@ public class ThemaService {
 
     public List<Betreuer> findBetreuerByThemaIdOrderByName(UUID themaId) {
         return repository.findBetreuerByThemaIdOrderByName(themaId);
+    }
+
+    public void addLink(UUID themaId, String url, String anzeigetext) {
+        Thema thema = getById(themaId);
+        thema.addLink(new Link(url, anzeigetext));
+        repository.save(thema);
+    }
+
+    public void updateLink(UUID themaId,
+                           String oldUrl,
+                           String oldAnzeigetext,
+                           String newUrl,
+                           String newAnzeigetext) {
+        Thema thema = getById(themaId);
+        thema.updateLink(new Link(oldUrl, oldAnzeigetext), new Link(newUrl, newAnzeigetext));
+        repository.save(thema);
+    }
+
+    public void removeLink(UUID themaId, String url, String anzeigetext) {
+        Thema thema = getById(themaId);
+        thema.removeLink(new Link(url, anzeigetext));
+        repository.save(thema);
     }
 
 }

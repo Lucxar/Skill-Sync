@@ -1,5 +1,7 @@
 package wiegand.luca.ThesisIsComing.domainModel;
 
+import wiegand.luca.ThesisIsComing.domainModel.exception.InvalidLinkException;
+import wiegand.luca.ThesisIsComing.domainModel.exception.LinkNotFoundException;
 import wiegand.luca.ThesisIsComing.domainModel.valueObjects.Fachgebiet;
 import wiegand.luca.ThesisIsComing.domainModel.valueObjects.Informationsdatei;
 import wiegand.luca.ThesisIsComing.domainModel.valueObjects.Kontaktinformationen;
@@ -95,6 +97,28 @@ public class Betreuer {
 
     public Set<Thema> getThemen() {
         return themen;
+    }
+
+    public void addLink(Link link) {
+        if (link == null) {
+            throw new InvalidLinkException("Link darf nicht null sein");
+        }
+        links.add(link);
+    }
+
+    public void updateLink(Link existing, Link updated) {
+        removeLink(existing);
+        addLink(updated);
+    }
+
+    public void removeLink(Link link) {
+        if (link == null) {
+            throw new InvalidLinkException("Link darf nicht null sein");
+        }
+        boolean removed = links.remove(link);
+        if (!removed) {
+            throw new LinkNotFoundException("Link wurde nicht gefunden");
+        }
     }
 
     public void assignThema(UUID themaId) {

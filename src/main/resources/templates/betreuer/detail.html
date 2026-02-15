@@ -30,11 +30,42 @@
 
         <div>
             <h2>Links</h2>
+            <p th:if="${linkError != null}" th:text="${linkError}">Fehler</p>
             <ul>
-                <li th:each="l : ${betreuer.links}">
+                <li th:each="l, iter : ${betreuer.links}">
                     <a th:href="${l.url}" th:text="${l.anzeigetext} ?: ${l.url}">Link</a>
+                    <div sec:authorize="hasAnyRole('ADMIN','BETREUER')">
+                        <form th:action="@{'/betreuer/' + ${betreuer.id} + '/links/update'}" method="post">
+                            <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+                            <input type="hidden" name="oldUrl" th:value="${l.url}" />
+                            <input type="hidden" name="oldAnzeigetext" th:value="${l.anzeigetext}" />
+                            <label th:for="${'link-url-' + iter.index}">URL</label>
+                            <input type="url" th:id="${'link-url-' + iter.index}" name="url" th:value="${l.url}" required />
+                            <label th:for="${'link-text-' + iter.index}">Anzeigetext</label>
+                            <input type="text" th:id="${'link-text-' + iter.index}" name="anzeigetext" th:value="${l.anzeigetext}" required />
+                            <button type="submit">Aendern</button>
+                        </form>
+                        <form th:action="@{'/betreuer/' + ${betreuer.id} + '/links/delete'}" method="post">
+                            <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+                            <input type="hidden" name="url" th:value="${l.url}" />
+                            <input type="hidden" name="anzeigetext" th:value="${l.anzeigetext}" />
+                            <button type="submit">Loeschen</button>
+                        </form>
+                    </div>
                 </li>
             </ul>
+            <p th:if="${betreuer.links == null || #lists.isEmpty(betreuer.links)}">Keine Links</p>
+            <div sec:authorize="hasAnyRole('ADMIN','BETREUER')">
+                <h3>Link hinzufuegen</h3>
+                <form th:action="@{'/betreuer/' + ${betreuer.id} + '/links'}" method="post">
+                    <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+                    <label for="new-link-url">URL</label>
+                    <input type="url" id="new-link-url" name="url" required />
+                    <label for="new-link-text">Anzeigetext</label>
+                    <input type="text" id="new-link-text" name="anzeigetext" required />
+                    <button type="submit">Hinzufuegen</button>
+                </form>
+            </div>
         </div>
 
         <div>

@@ -111,4 +111,67 @@ class BetreuerControllerTest {
                         .param("themaId", themaId.toString()))
                 .andExpect(status().isForbidden());
     }
+
+    @Test
+    @DisplayName("'/betreuer/{id}/links' adds a link and redirects")
+    @WithMockUser(roles = "ADMIN")
+    void add_link_redirects() throws Exception {
+        UUID betreuerId = UUID.randomUUID();
+
+        mvc.perform(post("/betreuer/{id}/links", betreuerId)
+                        .with(SecurityMockMvcRequestPostProcessors.csrf())
+                        .param("url", "https://example.com")
+                        .param("anzeigetext", "Beispiel"))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl("/betreuer/" + betreuerId));
+
+        verify(service).addLink(betreuerId, "https://example.com", "Beispiel");
+    }
+
+    @Test
+    @DisplayName("'/betreuer/{id}/links/update' updates a link and redirects")
+    @WithMockUser(roles = "ADMIN")
+    void update_link_redirects() throws Exception {
+        UUID betreuerId = UUID.randomUUID();
+
+        mvc.perform(post("/betreuer/{id}/links/update", betreuerId)
+                        .with(SecurityMockMvcRequestPostProcessors.csrf())
+                        .param("oldUrl", "https://old")
+                        .param("oldAnzeigetext", "Alt")
+                        .param("url", "https://neu")
+                        .param("anzeigetext", "Neu"))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl("/betreuer/" + betreuerId));
+
+        verify(service).updateLink(betreuerId, "https://old", "Alt", "https://neu", "Neu");
+    }
+
+    @Test
+    @DisplayName("'/betreuer/{id}/links/delete' deletes a link and redirects")
+    @WithMockUser(roles = "ADMIN")
+    void delete_link_redirects() throws Exception {
+        UUID betreuerId = UUID.randomUUID();
+
+        mvc.perform(post("/betreuer/{id}/links/delete", betreuerId)
+                        .with(SecurityMockMvcRequestPostProcessors.csrf())
+                        .param("url", "https://example.com")
+                        .param("anzeigetext", "Beispiel"))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl("/betreuer/" + betreuerId));
+
+        verify(service).removeLink(betreuerId, "https://example.com", "Beispiel");
+    }
+
+    @Test
+    @DisplayName("'/betreuer/{id}/links' is forbidden for students")
+    @WithMockUser(roles = "STUDIERENDE")
+    void add_link_forbidden_for_students() throws Exception {
+        UUID betreuerId = UUID.randomUUID();
+
+        mvc.perform(post("/betreuer/{id}/links", betreuerId)
+                        .with(SecurityMockMvcRequestPostProcessors.csrf())
+                        .param("url", "https://example.com")
+                        .param("anzeigetext", "Beispiel"))
+                .andExpect(status().isForbidden());
+    }
 }

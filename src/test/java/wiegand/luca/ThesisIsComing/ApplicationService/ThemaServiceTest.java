@@ -6,12 +6,16 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
+import org.mockito.ArgumentCaptor;
 import org.mockito.junit.jupiter.MockitoExtension;
 import wiegand.luca.ThesisIsComing.ApplicationService.exception.ThemaNotFoundException;
 import wiegand.luca.ThesisIsComing.domainModel.Thema;
+import wiegand.luca.ThesisIsComing.domainModel.exception.InvalidLinkException;
+import wiegand.luca.ThesisIsComing.domainModel.valueObjects.Link;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -75,6 +79,50 @@ public class ThemaServiceTest {
         assertThatThrownBy(() -> service.getById(UUID.randomUUID()))
                 .isInstanceOf(ThemaNotFoundException.class);
         verify(repo).findById(any(UUID.class));
+    }
+
+    @Test
+    @DisplayName("addLink saves updated Thema")
+    void addLink_saves_updated_thema() {
+        UUID id = UUID.randomUUID();
+        Thema thema = new Thema(id, "Thema 1");
+        when(repo.findById(id)).thenReturn(Optional.of(thema));
+        when(repo.save(any(Thema.class))).thenAnswer(invocation -> invocation.getArgument(0));
+
+        service.addLink(id, "https://example.com", "Beispiel");
+
+        ArgumentCaptor<Thema> captor = ArgumentCaptor.forClass(Thema.class);
+        verify(repo).save(captor.capture());
+        assertThat(captor.getValue().getLinks())
+                .containsExactly(new Link("https://example.com", "Beispiel"));
+    }
+
+    @Test
+    @DisplayName("updateLink replaces existing Link")
+    void updateLink_replaces_existing_link() {
+        UUID id = UUID.randomUUID();
+        Link oldLink = new Link("https://old", "Alt");
+        Thema thema = new Thema(id, "Thema 1", null, Set.of(), Set.of(), Set.of(), Set.of(oldLink), Set.of());
+        when(repo.findById(id)).thenReturn(Optional.of(thema));
+        when(repo.save(any(Thema.class))).thenAnswer(invocation -> invocation.getArgument(0));
+
+        service.updateLink(id, "https://old", "Alt", "https://neu", "Neu");
+
+        ArgumentCaptor<Thema> captor = ArgumentCaptor.forClass(Thema.class);
+        verify(repo).save(captor.capture());
+        assertThat(captor.getValue().getLinks())
+                .containsExactly(new Link("https://neu", "Neu"));
+    }
+
+    @Test
+    @DisplayName("addLink throws when invalid")
+    void addLink_throws_when_invalid() {
+        UUID id = UUID.randomUUID();
+        Thema thema = new Thema(id, "Thema 1");
+        when(repo.findById(id)).thenReturn(Optional.of(thema));
+
+        assertThatThrownBy(() -> service.addLink(id, " ", ""))
+                .isInstanceOf(InvalidLinkException.class);
     }
 
 }
