@@ -3,15 +3,17 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link rel="stylesheet" th:href="@{/css/accessibility.css}" />
     <title>Themadetail</title>
 </head>
 <body>
-<main>
+<a class="skip-link" href="#main-content">Zum Inhalt</a>
+<main id="main-content">
     <section>
         <h1 th:text="${thema.titel}">Thema</h1>
-        <p th:if="${themaError != null}" th:text="${themaError}">Fehler</p>
+        <p th:if="${themaError != null}" th:text="${themaError}" role="alert" aria-live="polite">Fehler</p>
 
-        <div sec:authorize="hasAnyRole('ADMIN','BETREUER')">
+        <div sec:authorize="hasAnyRole('ADMIN','BETREUER','ORGANISATOR')">
             <a th:href="@{'/themen/' + ${thema.id} + '/bearbeiten'}">Thema bearbeiten</a>
             <form th:action="@{'/themen/' + ${thema.id} + '/loeschen'}" method="post">
                 <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
@@ -21,8 +23,8 @@
 
         <div>
             <h2>Beschreibung</h2>
-            <p th:if="${thema.beschreibungMarkdown == null}">Keine Beschreibung vorhanden</p>
-            <p th:if="${thema.beschreibungMarkdown != null}" th:text="${thema.beschreibungMarkdown}">Beschreibung</p>
+            <p th:if="${beschreibungHtml == null}">Keine Beschreibung vorhanden</p>
+            <div th:if="${beschreibungHtml != null}" th:utext="${beschreibungHtml}">Beschreibung</div>
         </div>
 
         <div>
@@ -43,11 +45,11 @@
 
         <div>
             <h2>Links</h2>
-            <p th:if="${linkError != null}" th:text="${linkError}">Fehler</p>
+            <p th:if="${linkError != null}" th:text="${linkError}" role="alert" aria-live="polite">Fehler</p>
             <ul>
                 <li th:each="l, iter : ${thema.links}">
                     <a th:href="${l.url}" th:text="${l.anzeigetext} ?: ${l.url}">Link</a>
-                    <div sec:authorize="hasAnyRole('ADMIN','BETREUER')">
+                    <div sec:authorize="hasAnyRole('ADMIN','BETREUER','ORGANISATOR')">
                         <form th:action="@{'/themen/' + ${thema.id} + '/links/update'}" method="post">
                             <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
                             <input type="hidden" name="oldUrl" th:value="${l.url}" />
@@ -68,7 +70,7 @@
                 </li>
             </ul>
             <p th:if="${thema.links == null || #lists.isEmpty(thema.links)}">Keine Links</p>
-            <div sec:authorize="hasAnyRole('ADMIN','BETREUER')">
+            <div sec:authorize="hasAnyRole('ADMIN','BETREUER','ORGANISATOR')">
                 <h3>Link hinzufuegen</h3>
                 <form th:action="@{'/themen/' + ${thema.id} + '/links'}" method="post">
                     <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
@@ -100,7 +102,7 @@
             </ul>
         </div>
 
-        <div sec:authorize="hasAnyRole('ADMIN','BETREUER')">
+        <div sec:authorize="hasAnyRole('ADMIN','BETREUER','ORGANISATOR')">
             <h2>Betreuer zuordnen</h2>
             <form th:action="@{'/themen/' + ${thema.id} + '/betreuer'}" method="post">
                 <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />

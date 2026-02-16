@@ -3,10 +3,12 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link rel="stylesheet" th:href="@{/css/accessibility.css}" />
     <title>Ungueltige Anfrage</title>
 </head>
 <body>
-<main>
+<a class="skip-link" href="#main-content">Zum Inhalt</a>
+<main id="main-content">
     <section>
         <h1>Ungueltige Anfrage</h1>
         <p th:if="${message}" th:text="${message}">Ungueltige Anfrage.</p>

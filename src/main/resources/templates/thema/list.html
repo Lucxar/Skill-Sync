@@ -3,12 +3,17 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link rel="stylesheet" th:href="@{/css/accessibility.css}" />
     <title>Themenliste</title>
 </head>
 <body>
-<main>
+<a class="skip-link" href="#main-content">Zum Inhalt</a>
+<main id="main-content">
     <section>
         <h1>Themenliste</h1>
+        <div sec:authorize="hasAnyRole('BETREUER','STUDIERENDE')">
+            <a th:href="@{/mein-profil}">Mein Profil</a>
+        </div>
         <form th:action="@{/themen}" method="get" th:object="${sucheForm}">
             <label for="suchbegriff">Suche</label>
             <input id="suchbegriff" type="text" th:field="*{suchbegriff}" />
@@ -17,7 +22,7 @@
             <button type="submit">Anwenden</button>
             <a th:href="@{/themen}">Zuruecksetzen</a>
         </form>
-        <div sec:authorize="hasAnyRole('ADMIN','BETREUER')">
+        <div sec:authorize="hasAnyRole('ADMIN','BETREUER','ORGANISATOR')">
             <a th:href="@{/themen/neu}">Neues Thema anlegen</a>
         </div>
         <ul>

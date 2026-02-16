@@ -3,14 +3,16 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link rel="stylesheet" th:href="@{/css/accessibility.css}" />
     <title>Betreuerdetail</title>
 </head>
 <body>
-<main>
+<a class="skip-link" href="#main-content">Zum Inhalt</a>
+<main id="main-content">
     <section>
         <h1 th:text="${betreuer.name}">Betreuer</h1>
 
-        <div sec:authorize="hasAnyRole('ADMIN','BETREUER')">
+        <div sec:authorize="hasAnyRole('ADMIN','BETREUER','ORGANISATOR')">
             <a th:href="@{'/betreuer/' + ${betreuer.id} + '/bearbeiten'}">Betreuer bearbeiten</a>
             <form th:action="@{'/betreuer/' + ${betreuer.id} + '/loeschen'}" method="post">
                 <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
@@ -38,11 +40,11 @@
 
         <div>
             <h2>Links</h2>
-            <p th:if="${linkError != null}" th:text="${linkError}">Fehler</p>
+            <p th:if="${linkError != null}" th:text="${linkError}" role="alert" aria-live="polite">Fehler</p>
             <ul>
                 <li th:each="l, iter : ${betreuer.links}">
                     <a th:href="${l.url}" th:text="${l.anzeigetext} ?: ${l.url}">Link</a>
-                    <div sec:authorize="hasAnyRole('ADMIN','BETREUER')">
+                    <div sec:authorize="hasAnyRole('ADMIN','BETREUER','ORGANISATOR')">
                         <form th:action="@{'/betreuer/' + ${betreuer.id} + '/links/update'}" method="post">
                             <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
                             <input type="hidden" name="oldUrl" th:value="${l.url}" />
@@ -63,7 +65,7 @@
                 </li>
             </ul>
             <p th:if="${betreuer.links == null || #lists.isEmpty(betreuer.links)}">Keine Links</p>
-            <div sec:authorize="hasAnyRole('ADMIN','BETREUER')">
+            <div sec:authorize="hasAnyRole('ADMIN','BETREUER','ORGANISATOR')">
                 <h3>Link hinzufuegen</h3>
                 <form th:action="@{'/betreuer/' + ${betreuer.id} + '/links'}" method="post">
                     <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
@@ -78,34 +80,62 @@
 
         <div>
             <h2>Dateien</h2>
-            <p th:if="${dateiError != null}" th:text="${dateiError}">Fehler</p>
+            <p th:if="${dateiError != null}" th:text="${dateiError}" role="alert" aria-live="polite">Fehler</p>
             <ul>
-                <li th:each="d : ${betreuer.dateien}">
-                    <span th:text="${d.titel}">Titel</span>
-                    <span th:if="${d.dateityp != null}">(<span th:text="${d.dateityp}">Typ</span>)</span>
-                    <a th:if="${d.dateityp != null and d.dateityp.name() == 'MARKDOWN'}"
-                       th:href="@{'/dateien/' + ${betreuer.id} + '/' + ${d.dateisystemPfad} + '/markdown'}">
-                        Vorschau
-                    </a>
-                    <a th:if="${d.dateityp != null and d.dateityp.name() != 'MARKDOWN'}"
-                       th:href="@{'/dateien/' + ${betreuer.id} + '/' + ${d.dateisystemPfad} + '/download'}">
-                        Download
-                    </a>
+                <li th:each="d, iter : ${betreuer.dateien}">
+                    <div>
+                        <a th:if="${d.dateityp != null and d.dateityp.name() == 'MARKDOWN'}"
+                           th:href="@{'/dateien/' + ${betreuer.id} + '/' + ${d.dateisystemPfad} + '/markdown'}"
+                           th:text="${d.titel}">Titel</a>
+                        <a th:if="${d.dateityp != null and d.dateityp.name() != 'MARKDOWN'}"
+                           th:href="@{'/dateien/' + ${betreuer.id} + '/' + ${d.dateisystemPfad} + '/download'}"
+                           th:text="${d.titel}">Titel</a>
+                        <span th:if="${d.dateityp != null}">(<span th:text="${d.dateityp}">Typ</span>)</span>
+                    </div>
+                    <p th:if="${d.beschreibung != null}" th:text="${d.beschreibung}">Beschreibung</p>
+                    <p th:if="${d.uploaderName != null || d.uploadDatum != null}">
+                        <span th:if="${d.uploaderName != null}" th:text="${d.uploaderName}">Uploader</span>
+                        <span th:if="${d.uploadDatum != null}" th:text="${d.uploadDatum}">Datum</span>
+                    </p>
+                    <div sec:authorize="hasAnyRole('ADMIN','BETREUER','ORGANISATOR')">
+                        <h3>Metadaten bearbeiten</h3>
+                        <form th:action="@{'/betreuer/' + ${betreuer.id} + '/dateien/' + ${d.dateisystemPfad} + '/metadaten'}" method="post">
+                            <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+                            <label th:for="${'datei-meta-titel-' + iter.index}">Titel</label>
+                            <input type="text" th:id="${'datei-meta-titel-' + iter.index}" name="titel" th:value="${d.titel}" required />
+                            <label th:for="${'datei-meta-beschreibung-' + iter.index}">Beschreibung</label>
+                            <input type="text" th:id="${'datei-meta-beschreibung-' + iter.index}" name="beschreibung" th:value="${d.beschreibung}" />
+                            <button type="submit">Metadaten speichern</button>
+                        </form>
+                        <h3>Datei ersetzen</h3>
+                        <form th:action="@{'/betreuer/' + ${betreuer.id} + '/dateien/' + ${d.dateisystemPfad} + '/ersetzen'}" method="post" enctype="multipart/form-data">
+                            <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+                            <label th:for="${'datei-ersetzen-' + iter.index}">Neue Datei</label>
+                            <input type="file" th:id="${'datei-ersetzen-' + iter.index}" name="datei" accept=".pdf,.zip,.md,.markdown" required />
+                            <button type="submit">Ersetzen</button>
+                        </form>
+                        <form th:action="@{'/betreuer/' + ${betreuer.id} + '/dateien/' + ${d.dateisystemPfad} + '/loeschen'}" method="post">
+                            <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+                            <button type="submit">Datei loeschen</button>
+                        </form>
+                    </div>
                 </li>
             </ul>
             <p th:if="${betreuer.dateien == null || #lists.isEmpty(betreuer.dateien)}">Keine Dateien</p>
-            <div sec:authorize="hasAnyRole('ADMIN','BETREUER')">
+            <div sec:authorize="hasAnyRole('ADMIN','BETREUER','ORGANISATOR')">
                 <h3>Datei hochladen</h3>
                 <form th:action="@{'/betreuer/' + ${betreuer.id} + '/dateien'}" method="post" enctype="multipart/form-data" th:object="${dateiUploadForm}">
                     <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
                     <label for="datei-titel">Titel</label>
-                    <input type="text" id="datei-titel" th:field="*{titel}" required />
-                    <div th:if="${#fields.hasErrors('titel')}" th:errors="*{titel}">Fehler</div>
+                    <input type="text" id="datei-titel" th:field="*{titel}" required
+                           th:attr="aria-invalid=${#fields.hasErrors('titel')}, aria-describedby=${#fields.hasErrors('titel')} ? 'datei-titel-error' : null" />
+                    <div id="datei-titel-error" th:if="${#fields.hasErrors('titel')}" th:errors="*{titel}" role="alert" aria-live="polite">Fehler</div>
                     <label for="datei-beschreibung">Beschreibung</label>
                     <input type="text" id="datei-beschreibung" th:field="*{beschreibung}" />
                     <label for="datei-datei">Datei</label>
-                    <input type="file" id="datei-datei" th:field="*{datei}" accept=".pdf,.zip,.md,.markdown" required />
-                    <div th:if="${#fields.hasErrors('datei')}" th:errors="*{datei}">Fehler</div>
+                    <input type="file" id="datei-datei" th:field="*{datei}" accept=".pdf,.zip,.md,.markdown" required
+                           th:attr="aria-invalid=${#fields.hasErrors('datei')}, aria-describedby=${#fields.hasErrors('datei')} ? 'datei-datei-error' : null" />
+                    <div id="datei-datei-error" th:if="${#fields.hasErrors('datei')}" th:errors="*{datei}" role="alert" aria-live="polite">Fehler</div>
                     <button type="submit">Hochladen</button>
                 </form>
             </div>
@@ -120,7 +150,7 @@
             </ul>
         </div>
 
-        <div sec:authorize="hasAnyRole('ADMIN','BETREUER')">
+        <div sec:authorize="hasAnyRole('ADMIN','BETREUER','ORGANISATOR')">
             <h2>Thema zuordnen</h2>
             <form th:action="@{'/betreuer/' + ${betreuer.id} + '/themen'}" method="post">
                 <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />

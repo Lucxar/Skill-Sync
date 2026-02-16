@@ -5,33 +5,42 @@ import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 import org.springframework.web.servlet.ModelAndView;
+import wiegand.luca.ThesisIsComing.ApplicationService.exception.OptimisticLockingException;
 import wiegand.luca.ThesisIsComing.ApplicationService.exception.StudentNotFoundException;
 import wiegand.luca.ThesisIsComing.presentationDriving.exception.StudentListIsEmpty;
 
 @ControllerAdvice
 public class StudentControllerAdvice {
 
-    @ExceptionHandler(StudentNotFoundException.class)
-    public ModelAndView handleStudentNotFound(StudentNotFoundException ex) {
-        ModelAndView mav = new ModelAndView("errors/404");
-        mav.setStatus(HttpStatus.NOT_FOUND);
-        mav.addObject("message", ex.getMessage());
-        return mav;
-    }
+  @ExceptionHandler(StudentNotFoundException.class)
+  public ModelAndView handleStudentNotFound(StudentNotFoundException ex) {
+    ModelAndView mav = new ModelAndView("errors/404");
+    mav.setStatus(HttpStatus.NOT_FOUND);
+    mav.addObject("message", ex.getMessage());
+    return mav;
+  }
 
-    @ExceptionHandler(StudentListIsEmpty.class)
-    public ModelAndView handleStudentListEmpty(StudentListIsEmpty ex) {
-        ModelAndView mav = new ModelAndView("errors/404");
-        mav.setStatus(HttpStatus.NOT_FOUND);
-        mav.addObject("message", ex.getMessage());
-        return mav;
-    }
+  @ExceptionHandler(StudentListIsEmpty.class)
+  public ModelAndView handleStudentListEmpty(StudentListIsEmpty ex) {
+    ModelAndView mav = new ModelAndView("errors/404");
+    mav.setStatus(HttpStatus.NOT_FOUND);
+    mav.addObject("message", ex.getMessage());
+    return mav;
+  }
 
-    @ExceptionHandler(MethodArgumentTypeMismatchException.class)
-    public ModelAndView handleBadRequest(MethodArgumentTypeMismatchException ex) {
-        ModelAndView mav = new ModelAndView("errors/400");
-        mav.setStatus(HttpStatus.BAD_REQUEST);
-        mav.addObject("message", "Ungueltige Anfrage: " + ex.getValue());
-        return mav;
-    }
+  @ExceptionHandler(MethodArgumentTypeMismatchException.class)
+  public ModelAndView handleBadRequest(MethodArgumentTypeMismatchException ex) {
+    ModelAndView mav = new ModelAndView("errors/400");
+    mav.setStatus(HttpStatus.BAD_REQUEST);
+    mav.addObject("message", "Ungueltige Anfrage: " + ex.getValue());
+    return mav;
+  }
+
+  @ExceptionHandler(OptimisticLockingException.class)
+  public ModelAndView handleOptimisticLocking(OptimisticLockingException ex) {
+    ModelAndView mav = new ModelAndView("errors/409");
+    mav.setStatus(HttpStatus.CONFLICT);
+    mav.addObject("message", ex.getMessage());
+    return mav;
+  }
 }

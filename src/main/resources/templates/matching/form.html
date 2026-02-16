@@ -3,14 +3,16 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link rel="stylesheet" th:href="@{/css/accessibility.css}" />
     <title>Matching</title>
 </head>
 <body>
-<main>
+<a class="skip-link" href="#main-content">Zum Inhalt</a>
+<main id="main-content">
     <section>
         <h1>Matching</h1>
         <p>Gib deine bestandenen Veranstaltungen und Interessensgebiete an, um passende Themen und Betreuer zu finden.</p>
-        <p th:if="${matchingError != null}" th:text="${matchingError}">Bitte Angaben machen.</p>
+        <p th:if="${matchingError != null}" th:text="${matchingError}" role="alert" aria-live="polite">Bitte Angaben machen.</p>
         <form th:action="@{/matching}" method="post" th:object="${matchingForm}">
             <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
             <label for="bestandeneKurse">Bestandene Kurse</label>

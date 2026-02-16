@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html lang="de" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link rel="stylesheet" th:href="@{/css/accessibility.css}" />
+    <title>Konflikt</title>
+</head>
+<body>
+<a class="skip-link" href="#main-content">Zum Inhalt</a>
+<main id="main-content">
+    <section>
+        <h1>Konflikt</h1>
+        <p th:if="${message}" th:text="${message}">Datensatz wurde geaendert.</p>
+        <p th:if="${message == null}">Datensatz wurde geaendert.</p>
+    </section>
+</main>
+</body>
+</html>

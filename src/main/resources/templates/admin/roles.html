@@ -3,10 +3,12 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link rel="stylesheet" th:href="@{/css/accessibility.css}" />
     <title>Rollenverwaltung</title>
 </head>
 <body>
-<main>
+<a class="skip-link" href="#main-content">Zum Inhalt</a>
+<main id="main-content">
     <section>
         <h1>Rollenverwaltung</h1>
         <p>GitHub-Logins zuweisen oder entziehen.</p>
@@ -32,7 +34,7 @@
                             <input type="text" th:field="*{githubLogin}" placeholder="github-login" />
                         </label>
                         <button type="submit">Zuweisen</button>
-                        <div th:if="${#fields.hasErrors('githubLogin')}" th:errors="*{githubLogin}">Fehler</div>
+                        <div th:if="${#fields.hasErrors('githubLogin')}" th:errors="*{githubLogin}" role="alert" aria-live="polite">Fehler</div>
                     </form>
                 </td>
                 <td>
@@ -41,13 +43,56 @@
                         <input type="hidden" name="betreuerId" th:value="${b.id}" />
                         <button type="submit"
                                 th:disabled="${b.githubLogin == null || #strings.isEmpty(b.githubLogin)}">Entziehen</button>
-                        <div th:if="${#fields.hasErrors('betreuerId')}" th:errors="*{betreuerId}">Fehler</div>
+                        <div th:if="${#fields.hasErrors('betreuerId')}" th:errors="*{betreuerId}" role="alert" aria-live="polite">Fehler</div>
                     </form>
                 </td>
             </tr>
             </tbody>
         </table>
         <p th:if="${betreuer == null || #lists.isEmpty(betreuer)}">Keine Betreuer vorhanden</p>
+    </section>
+    <section>
+        <h2>Weitere Rollen</h2>
+        <p>Organisator:innen und Korrektor:innen fuer GitHub-Logins verwalten.</p>
+        <form th:action="@{/admin/rollen/zuweisen/benutzerrolle}" method="post" th:object="${userRoleAssignForm}">
+            <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+            <label for="userRoleLogin">GitHub-Login</label>
+            <input type="text" id="userRoleLogin" th:field="*{githubLogin}" placeholder="github-login" />
+            <label for="userRoleSelect">Rolle</label>
+            <select id="userRoleSelect" th:field="*{role}">
+                <option value="">Bitte waehlen</option>
+                <option value="ORGANISATOR">Organisator:in</option>
+                <option value="KORREKTOR">Korrektor:in</option>
+            </select>
+            <button type="submit">Rolle zuweisen</button>
+            <div th:if="${#fields.hasErrors('githubLogin')}" th:errors="*{githubLogin}" role="alert" aria-live="polite">Fehler</div>
+            <div th:if="${#fields.hasErrors('role')}" th:errors="*{role}" role="alert" aria-live="polite">Fehler</div>
+            <div th:if="${#fields.hasGlobalErrors()}" th:errors="*{*}" role="alert" aria-live="polite">Fehler</div>
+        </form>
+        <table>
+            <thead>
+            <tr>
+                <th>GitHub-Login</th>
+                <th>Rolle</th>
+                <th>Aktion</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr th:each="ra : ${roleAssignments}">
+                <td th:text="${ra.githubLogin}">login</td>
+                <td th:text="${ra.role == 'ROLE_ORGANISATOR' ? 'Organisator:in' : 'Korrektor:in'}">Rolle</td>
+                <td>
+                    <form th:action="@{/admin/rollen/entziehen/benutzerrolle}" method="post" th:object="${userRoleRemoveForm}">
+                        <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+                        <input type="hidden" name="githubLogin" th:value="${ra.githubLogin}" />
+                        <input type="hidden" name="role" th:value="${ra.role}" />
+                        <button type="submit">Entziehen</button>
+                    </form>
+                </td>
+            </tr>
+            </tbody>
+        </table>
+        <p th:if="${roleAssignments == null || #lists.isEmpty(roleAssignments)}">Keine weiteren Rollen vergeben</p>
     </section>
 </main>
 </body>
