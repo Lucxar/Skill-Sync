@@ -2,6 +2,9 @@ plugins {
     id 'java'
     id 'org.springframework.boot' version '4.0.2'
     id 'io.spring.dependency-management' version '1.1.7'
+    id 'com.github.spotbugs' version '6.1.7'
+    id 'com.diffplug.spotless' version '6.25.0'
+    id 'jacoco'
 }
 
 group = 'wiegand.luca'
@@ -10,7 +13,7 @@ description = 'ThesisIsComing'
 
 java {
     toolchain {
-        languageVersion = JavaLanguageVersion.of(25)
+        languageVersion = JavaLanguageVersion.of(21)
     }
 }
 
@@ -60,4 +63,49 @@ dependencies {
 tasks.named('test') {
     useJUnitPlatform()
     systemProperty 'spring.profiles.active', 'test'
+}
+
+jacoco {
+    toolVersion = '0.8.12'
+}
+
+jacocoTestReport {
+    dependsOn test
+    reports {
+        html.required = true
+        xml.required = true
+    }
+}
+
+jacocoTestCoverageVerification {
+    dependsOn test
+    violationRules {
+        rule {
+            limit {
+                minimum = 0.80
+            }
+        }
+    }
+}
+
+tasks.named('check') {
+    dependsOn jacocoTestCoverageVerification
+}
+
+spotbugs {
+    toolVersion = '4.8.6'
+}
+
+tasks.withType(com.github.spotbugs.snom.SpotBugsTask).configureEach {
+    reports {
+        html.required = true
+        xml.required = false
+    }
+}
+
+spotless {
+    java {
+        googleJavaFormat('1.17.0')
+        target 'src/**/*.java'
+    }
 }
