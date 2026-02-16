@@ -1,14 +1,21 @@
 package wiegand.luca.ThesisIsComing.infrastructureDriven;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+
+import java.time.LocalDateTime;
+import java.util.Optional;
+import java.util.Set;
+import java.util.UUID;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.BeforeEach;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.data.jdbc.test.autoconfigure.DataJdbcTest;
 import org.springframework.boot.jdbc.test.autoconfigure.AutoConfigureTestDatabase;
 import org.springframework.context.annotation.Import;
-import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.TestPropertySource;
 import wiegand.luca.ThesisIsComing.ApplicationService.BetreuerRepository;
@@ -20,14 +27,6 @@ import wiegand.luca.ThesisIsComing.domainModel.valueObjects.Informationsdatei;
 import wiegand.luca.ThesisIsComing.domainModel.valueObjects.Kontaktinformationen;
 import wiegand.luca.ThesisIsComing.domainModel.valueObjects.Link;
 
-import java.util.Optional;
-import java.util.Set;
-import java.util.UUID;
-import java.time.LocalDateTime;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
-
 @DataJdbcTest
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
 @Import(BetreuerRepositoryImplementation.class)
@@ -35,299 +34,299 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 @ActiveProfiles("test")
 class BetreuerRepositoryImplementationTest extends TestPostgresContainer {
 
-    @Autowired
-    private BetreuerRepository betreuerRepository;
+  @Autowired private BetreuerRepository betreuerRepository;
 
-    @Autowired
-    private JdbcTemplate jdbcTemplate;
+  @Autowired private JdbcTemplate jdbcTemplate;
 
-    @Test
-    @DisplayName("save inserts a new Betreuer")
-    void save_inserts_new_betreuer() {
-        UUID id = UUID.randomUUID();
-        Kontaktinformationen kontakt = new Kontaktinformationen("a@b.de", "M-1");
-        Betreuer betreuer = new Betreuer(id, "Anna", kontakt, Set.of(), Set.of(), Set.of());
+  @Test
+  @DisplayName("save inserts a new Betreuer")
+  void save_inserts_new_betreuer() {
+    UUID id = UUID.randomUUID();
+    Kontaktinformationen kontakt = new Kontaktinformationen("a@b.de", "M-1");
+    Betreuer betreuer = new Betreuer(id, "Anna", kontakt, Set.of(), Set.of(), Set.of());
 
-        Betreuer saved = betreuerRepository.save(betreuer);
-        Integer count = jdbcTemplate.queryForObject("select count(*) from betreuer where id = ?", Integer.class, id);
+    Betreuer saved = betreuerRepository.save(betreuer);
+    Integer count =
+        jdbcTemplate.queryForObject(
+            "select count(*) from betreuer where id = ?", Integer.class, id);
 
-        assertThat(saved.getId()).isEqualTo(id);
-        assertThat(count).isEqualTo(1);
-    }
+    assertThat(saved.getId()).isEqualTo(id);
+    assertThat(count).isEqualTo(1);
+  }
 
-    @Test
-    @DisplayName("save updates an existing Betreuer")
-    void save_updates_existing_betreuer() {
-        UUID id = UUID.randomUUID();
-        jdbcTemplate.update(
-                "insert into betreuer (id, name, email, matrikelnummer) values (?, ?, ?, ?)",
-                id, "Old", "old@b.de", "M-0"
-        );
-        Kontaktinformationen kontakt = new Kontaktinformationen("a@b.de", "M-1");
-        Betreuer betreuer = new Betreuer(id, "Anna", kontakt, Set.of(), Set.of(), Set.of());
+  @Test
+  @DisplayName("save updates an existing Betreuer")
+  void save_updates_existing_betreuer() {
+    UUID id = UUID.randomUUID();
+    jdbcTemplate.update(
+        "insert into betreuer (id, name, email, matrikelnummer) values (?, ?, ?, ?)",
+        id,
+        "Old",
+        "old@b.de",
+        "M-0");
+    Kontaktinformationen kontakt = new Kontaktinformationen("a@b.de", "M-1");
+    Betreuer betreuer = new Betreuer(id, "Anna", kontakt, Set.of(), Set.of(), Set.of());
 
-        Betreuer saved = betreuerRepository.save(betreuer);
-        Optional<Betreuer> loaded = betreuerRepository.findById(id);
+    Betreuer saved = betreuerRepository.save(betreuer);
+    Optional<Betreuer> loaded = betreuerRepository.findById(id);
 
-        assertThat(saved.getId()).isEqualTo(id);
-        assertThat(loaded).isPresent();
-        assertThat(loaded.get().getName()).isEqualTo("Anna");
-    }
+    assertThat(saved.getId()).isEqualTo(id);
+    assertThat(loaded).isPresent();
+    assertThat(loaded.get().getName()).isEqualTo("Anna");
+  }
 
-    @Test
-    @DisplayName("save persists links for Betreuer")
-    void save_persists_links() {
-        UUID id = UUID.randomUUID();
-        Kontaktinformationen kontakt = new Kontaktinformationen("a@b.de", "M-1");
-        Betreuer betreuer = new Betreuer(
-                id,
-                "Anna",
-                kontakt,
-                Set.of(),
-                Set.of(),
-                Set.of(new Link("https://example.com", "Beispiel"))
-        );
+  @Test
+  @DisplayName("save persists links for Betreuer")
+  void save_persists_links() {
+    UUID id = UUID.randomUUID();
+    Kontaktinformationen kontakt = new Kontaktinformationen("a@b.de", "M-1");
+    Betreuer betreuer =
+        new Betreuer(
+            id,
+            "Anna",
+            kontakt,
+            Set.of(),
+            Set.of(),
+            Set.of(new Link("https://example.com", "Beispiel")));
 
-        betreuerRepository.save(betreuer);
+    betreuerRepository.save(betreuer);
 
-        Integer count = jdbcTemplate.queryForObject(
-                "select count(*) from betreuer_link where betreuer_id = ?",
-                Integer.class,
-                id
-        );
-        assertThat(count).isEqualTo(1);
+    Integer count =
+        jdbcTemplate.queryForObject(
+            "select count(*) from betreuer_link where betreuer_id = ?", Integer.class, id);
+    assertThat(count).isEqualTo(1);
 
-        var row = jdbcTemplate.queryForMap(
-                "select url, anzeigetext from betreuer_link where betreuer_id = ?",
-                id
-        );
-        assertThat(row.get("url")).isEqualTo("https://example.com");
-        assertThat(row.get("anzeigetext")).isEqualTo("Beispiel");
-    }
+    var row =
+        jdbcTemplate.queryForMap(
+            "select url, anzeigetext from betreuer_link where betreuer_id = ?", id);
+    assertThat(row.get("url")).isEqualTo("https://example.com");
+    assertThat(row.get("anzeigetext")).isEqualTo("Beispiel");
+  }
 
-    @Test
-    @DisplayName("save persists informationsdatei metadata for Betreuer")
-    void save_persists_informationsdatei_metadata() {
-        UUID id = UUID.randomUUID();
-        Kontaktinformationen kontakt = new Kontaktinformationen("a@b.de", "M-1");
-        Informationsdatei datei = new Informationsdatei(
-                "Info",
-                "Beschreibung",
-                "anna",
-                LocalDateTime.now(),
-                "stored.pdf",
-                Dateityp.PDF,
-                "info.pdf",
-                123L
-        );
-        Betreuer betreuer = new Betreuer(id, "Anna", kontakt, Set.of(), Set.of(datei), Set.of());
+  @Test
+  @DisplayName("save persists informationsdatei metadata for Betreuer")
+  void save_persists_informationsdatei_metadata() {
+    UUID id = UUID.randomUUID();
+    Kontaktinformationen kontakt = new Kontaktinformationen("a@b.de", "M-1");
+    Informationsdatei datei =
+        new Informationsdatei(
+            "Info",
+            "Beschreibung",
+            "anna",
+            LocalDateTime.now(),
+            "stored.pdf",
+            Dateityp.PDF,
+            "info.pdf",
+            123L);
+    Betreuer betreuer = new Betreuer(id, "Anna", kontakt, Set.of(), Set.of(datei), Set.of());
 
-        betreuerRepository.save(betreuer);
+    betreuerRepository.save(betreuer);
 
-        var row = jdbcTemplate.queryForMap(
-                "select dateityp, original_dateiname, groesse_in_bytes from betreuer_informationsdatei where betreuer_id = ?",
-                id
-        );
-        assertThat(row.get("dateityp").toString()).isEqualTo("PDF");
-        assertThat(row.get("original_dateiname")).isEqualTo("info.pdf");
-        assertThat(((Number) row.get("groesse_in_bytes")).longValue()).isEqualTo(123L);
-    }
+    var row =
+        jdbcTemplate.queryForMap(
+            "select dateityp, original_dateiname, groesse_in_bytes from betreuer_informationsdatei where betreuer_id = ?",
+            id);
+    assertThat(row.get("dateityp").toString()).isEqualTo("PDF");
+    assertThat(row.get("original_dateiname")).isEqualTo("info.pdf");
+    assertThat(((Number) row.get("groesse_in_bytes")).longValue()).isEqualTo(123L);
+  }
 
-    @Test
-    @DisplayName("relation queries return Themen for a Betreuer")
-    void relation_queries_return_themen_for_betreuer() {
-        UUID betreuerId = UUID.randomUUID();
-        UUID themaId1 = UUID.randomUUID();
-        UUID themaId2 = UUID.randomUUID();
+  @Test
+  @DisplayName("relation queries return Themen for a Betreuer")
+  void relation_queries_return_themen_for_betreuer() {
+    UUID betreuerId = UUID.randomUUID();
+    UUID themaId1 = UUID.randomUUID();
+    UUID themaId2 = UUID.randomUUID();
 
-        jdbcTemplate.update(
-                "insert into betreuer (id, name, email, matrikelnummer) values (?, ?, ?, ?)",
-                betreuerId, "Anna", null, null
-        );
-        jdbcTemplate.update(
-                "insert into thema (id, titel, beschreibung_markdown) values (?, ?, ?)",
-                themaId1, "A", null
-        );
-        jdbcTemplate.update(
-                "insert into thema (id, titel, beschreibung_markdown) values (?, ?, ?)",
-                themaId2, "B", null
-        );
-        jdbcTemplate.update(
-                "insert into betreuer_thema (betreuer_id, thema_id) values (?, ?)",
-                betreuerId, themaId1
-        );
-        jdbcTemplate.update(
-                "insert into betreuer_thema (betreuer_id, thema_id) values (?, ?)",
-                betreuerId, themaId2
-        );
+    jdbcTemplate.update(
+        "insert into betreuer (id, name, email, matrikelnummer) values (?, ?, ?, ?)",
+        betreuerId,
+        "Anna",
+        null,
+        null);
+    jdbcTemplate.update(
+        "insert into thema (id, titel, beschreibung_markdown) values (?, ?, ?)",
+        themaId1,
+        "A",
+        null);
+    jdbcTemplate.update(
+        "insert into thema (id, titel, beschreibung_markdown) values (?, ?, ?)",
+        themaId2,
+        "B",
+        null);
+    jdbcTemplate.update(
+        "insert into betreuer_thema (betreuer_id, thema_id) values (?, ?)", betreuerId, themaId1);
+    jdbcTemplate.update(
+        "insert into betreuer_thema (betreuer_id, thema_id) values (?, ?)", betreuerId, themaId2);
 
-        assertThat(betreuerRepository.findThemaIdsByBetreuerId(betreuerId))
-                .containsExactlyInAnyOrder(themaId1, themaId2);
+    assertThat(betreuerRepository.findThemaIdsByBetreuerId(betreuerId))
+        .containsExactlyInAnyOrder(themaId1, themaId2);
 
-        assertThat(betreuerRepository.findThemenByBetreuerIdOrderByTitel(betreuerId))
-                .extracting(Thema::getTitel)
-                .containsExactly("A", "B");
+    assertThat(betreuerRepository.findThemenByBetreuerIdOrderByTitel(betreuerId))
+        .extracting(Thema::getTitel)
+        .containsExactly("A", "B");
 
-        assertThat(betreuerRepository.countThemenByBetreuerId(betreuerId)).isEqualTo(2);
-        assertThat(betreuerRepository.existsBetreuerThema(betreuerId, themaId1)).isTrue();
-        assertThat(betreuerRepository.existsBetreuerThema(betreuerId, UUID.randomUUID())).isFalse();
-    }
+    assertThat(betreuerRepository.countThemenByBetreuerId(betreuerId)).isEqualTo(2);
+    assertThat(betreuerRepository.existsBetreuerThema(betreuerId, themaId1)).isTrue();
+    assertThat(betreuerRepository.existsBetreuerThema(betreuerId, UUID.randomUUID())).isFalse();
+  }
 
-    @Test
-    @DisplayName("findByNameContainsIgnoreCase returns matching Betreuer")
-    void findByNameContainsIgnoreCase_returns_matching_betreuer() {
-        UUID id1 = UUID.randomUUID();
-        UUID id2 = UUID.randomUUID();
-        jdbcTemplate.update(
-                "insert into betreuer (id, name, email, matrikelnummer) values (?, ?, ?, ?)",
-                id1, "Anna", null, null
-        );
-        jdbcTemplate.update(
-                "insert into betreuer (id, name, email, matrikelnummer) values (?, ?, ?, ?)",
-                id2, "Bernd", null, null
-        );
+  @Test
+  @DisplayName("findByNameContainsIgnoreCase returns matching Betreuer")
+  void findByNameContainsIgnoreCase_returns_matching_betreuer() {
+    UUID id1 = UUID.randomUUID();
+    UUID id2 = UUID.randomUUID();
+    jdbcTemplate.update(
+        "insert into betreuer (id, name, email, matrikelnummer) values (?, ?, ?, ?)",
+        id1,
+        "Anna",
+        null,
+        null);
+    jdbcTemplate.update(
+        "insert into betreuer (id, name, email, matrikelnummer) values (?, ?, ?, ?)",
+        id2,
+        "Bernd",
+        null,
+        null);
 
-        var result = betreuerRepository.findByNameContainsIgnoreCase("ann");
+    var result = betreuerRepository.findByNameContainsIgnoreCase("ann");
 
-        assertThat(result).extracting(Betreuer::getName)
-                .containsExactly("Anna");
-    }
+    assertThat(result).extracting(Betreuer::getName).containsExactly("Anna");
+  }
 
-    @Test
-    @DisplayName("findByFachgebiet returns matching Betreuer")
-    void findByFachgebiet_returns_matching_betreuer() {
-        UUID id1 = UUID.randomUUID();
-        UUID id2 = UUID.randomUUID();
-        jdbcTemplate.update(
-                "insert into betreuer (id, name, email, matrikelnummer) values (?, ?, ?, ?)",
-                id1, "Anna", null, null
-        );
-        jdbcTemplate.update(
-                "insert into betreuer (id, name, email, matrikelnummer) values (?, ?, ?, ?)",
-                id2, "Bernd", null, null
-        );
-        jdbcTemplate.update(
-                "insert into betreuer_fachgebiet (bezeichnung, betreuer_id) values (?, ?)",
-                "AI", id1
-        );
-        jdbcTemplate.update(
-                "insert into betreuer_fachgebiet (bezeichnung, betreuer_id) values (?, ?)",
-                "Data", id2
-        );
+  @Test
+  @DisplayName("findByFachgebiet returns matching Betreuer")
+  void findByFachgebiet_returns_matching_betreuer() {
+    UUID id1 = UUID.randomUUID();
+    UUID id2 = UUID.randomUUID();
+    jdbcTemplate.update(
+        "insert into betreuer (id, name, email, matrikelnummer) values (?, ?, ?, ?)",
+        id1,
+        "Anna",
+        null,
+        null);
+    jdbcTemplate.update(
+        "insert into betreuer (id, name, email, matrikelnummer) values (?, ?, ?, ?)",
+        id2,
+        "Bernd",
+        null,
+        null);
+    jdbcTemplate.update(
+        "insert into betreuer_fachgebiet (bezeichnung, betreuer_id) values (?, ?)", "AI", id1);
+    jdbcTemplate.update(
+        "insert into betreuer_fachgebiet (bezeichnung, betreuer_id) values (?, ?)", "Data", id2);
 
-        var result = betreuerRepository.findByFachgebiet("ai");
+    var result = betreuerRepository.findByFachgebiet("ai");
 
-        assertThat(result).extracting(Betreuer::getName)
-                .containsExactly("Anna");
-    }
+    assertThat(result).extracting(Betreuer::getName).containsExactly("Anna");
+  }
 
-    @Test
-    @DisplayName("findByNameContainsIgnoreCaseAndFachgebiet returns matching Betreuer")
-    void findByNameContainsIgnoreCaseAndFachgebiet_returns_matching_betreuer() {
-        UUID id1 = UUID.randomUUID();
-        UUID id2 = UUID.randomUUID();
-        jdbcTemplate.update(
-                "insert into betreuer (id, name, email, matrikelnummer) values (?, ?, ?, ?)",
-                id1, "Anna", null, null
-        );
-        jdbcTemplate.update(
-                "insert into betreuer (id, name, email, matrikelnummer) values (?, ?, ?, ?)",
-                id2, "Anna Maria", null, null
-        );
-        jdbcTemplate.update(
-                "insert into betreuer_fachgebiet (bezeichnung, betreuer_id) values (?, ?)",
-                "AI", id1
-        );
-        jdbcTemplate.update(
-                "insert into betreuer_fachgebiet (bezeichnung, betreuer_id) values (?, ?)",
-                "Data", id2
-        );
+  @Test
+  @DisplayName("findByNameContainsIgnoreCaseAndFachgebiet returns matching Betreuer")
+  void findByNameContainsIgnoreCaseAndFachgebiet_returns_matching_betreuer() {
+    UUID id1 = UUID.randomUUID();
+    UUID id2 = UUID.randomUUID();
+    jdbcTemplate.update(
+        "insert into betreuer (id, name, email, matrikelnummer) values (?, ?, ?, ?)",
+        id1,
+        "Anna",
+        null,
+        null);
+    jdbcTemplate.update(
+        "insert into betreuer (id, name, email, matrikelnummer) values (?, ?, ?, ?)",
+        id2,
+        "Anna Maria",
+        null,
+        null);
+    jdbcTemplate.update(
+        "insert into betreuer_fachgebiet (bezeichnung, betreuer_id) values (?, ?)", "AI", id1);
+    jdbcTemplate.update(
+        "insert into betreuer_fachgebiet (bezeichnung, betreuer_id) values (?, ?)", "Data", id2);
 
-        var result = betreuerRepository.findByNameContainsIgnoreCaseAndFachgebiet("anna", "ai");
+    var result = betreuerRepository.findByNameContainsIgnoreCaseAndFachgebiet("anna", "ai");
 
-        assertThat(result).extracting(Betreuer::getId)
-                .containsExactly(id1);
-    }
+    assertThat(result).extracting(Betreuer::getId).containsExactly(id1);
+  }
 
-    @Test
-    @DisplayName("deleteById removes Betreuer and linked data")
-    void deleteById_removes_betreuer_and_links() {
-        UUID id = UUID.randomUUID();
-        Kontaktinformationen kontakt = new Kontaktinformationen("a@b.de", "M-1");
-        Betreuer betreuer = new Betreuer(
-                id,
-                "Anna",
-                kontakt,
-                Set.of(),
-                Set.of(),
-                Set.of(new Link("https://example.com", "Beispiel"))
-        );
-        betreuerRepository.save(betreuer);
+  @Test
+  @DisplayName("deleteById removes Betreuer and linked data")
+  void deleteById_removes_betreuer_and_links() {
+    UUID id = UUID.randomUUID();
+    Kontaktinformationen kontakt = new Kontaktinformationen("a@b.de", "M-1");
+    Betreuer betreuer =
+        new Betreuer(
+            id,
+            "Anna",
+            kontakt,
+            Set.of(),
+            Set.of(),
+            Set.of(new Link("https://example.com", "Beispiel")));
+    betreuerRepository.save(betreuer);
 
-        betreuerRepository.deleteById(id);
+    betreuerRepository.deleteById(id);
 
-        Integer betreuerCount = jdbcTemplate.queryForObject(
-                "select count(*) from betreuer where id = ?",
-                Integer.class,
-                id
-        );
-        Integer linkCount = jdbcTemplate.queryForObject(
-                "select count(*) from betreuer_link where betreuer_id = ?",
-                Integer.class,
-                id
-        );
-        assertThat(betreuerCount).isEqualTo(0);
-        assertThat(linkCount).isEqualTo(0);
-    }
+    Integer betreuerCount =
+        jdbcTemplate.queryForObject(
+            "select count(*) from betreuer where id = ?", Integer.class, id);
+    Integer linkCount =
+        jdbcTemplate.queryForObject(
+            "select count(*) from betreuer_link where betreuer_id = ?", Integer.class, id);
+    assertThat(betreuerCount).isEqualTo(0);
+    assertThat(linkCount).isEqualTo(0);
+  }
 
-    @Test
-    @DisplayName("findByGithubLogin returns Betreuer when login matches")
-    void findByGithubLogin_returns_betreuer() {
-        UUID id = UUID.randomUUID();
-        jdbcTemplate.update(
-                "insert into betreuer (id, name, email, matrikelnummer, github_login) values (?, ?, ?, ?, ?)",
-                id, "Anna", "anna@uni.de", "M-1", "anna-gh"
-        );
+  @Test
+  @DisplayName("findByGithubLogin returns Betreuer when login matches")
+  void findByGithubLogin_returns_betreuer() {
+    UUID id = UUID.randomUUID();
+    jdbcTemplate.update(
+        "insert into betreuer (id, name, email, matrikelnummer, github_login) values (?, ?, ?, ?, ?)",
+        id,
+        "Anna",
+        "anna@uni.de",
+        "M-1",
+        "anna-gh");
 
-        Optional<Betreuer> result = betreuerRepository.findByGithubLogin("anna-gh");
+    Optional<Betreuer> result = betreuerRepository.findByGithubLogin("anna-gh");
 
-        assertThat(result).isPresent();
-        assertThat(result.get().getId()).isEqualTo(id);
-    }
+    assertThat(result).isPresent();
+    assertThat(result.get().getId()).isEqualTo(id);
+  }
 
-    @Test
-    @DisplayName("save persists github_login for Betreuer")
-    void save_persists_github_login() {
-        UUID id = UUID.randomUUID();
-        Betreuer betreuer = new Betreuer(id, "Anna");
-        betreuer.assignGithubLogin("anna-gh");
+  @Test
+  @DisplayName("save persists github_login for Betreuer")
+  void save_persists_github_login() {
+    UUID id = UUID.randomUUID();
+    Betreuer betreuer = new Betreuer(id, "Anna");
+    betreuer.assignGithubLogin("anna-gh");
 
-        betreuerRepository.save(betreuer);
+    betreuerRepository.save(betreuer);
 
-        String login = jdbcTemplate.queryForObject(
-                "select github_login from betreuer where id = ?",
-                String.class,
-                id
-        );
-        assertThat(login).isEqualTo("anna-gh");
-    }
+    String login =
+        jdbcTemplate.queryForObject(
+            "select github_login from betreuer where id = ?", String.class, id);
+    assertThat(login).isEqualTo("anna-gh");
+  }
 
-    @Test
-    @DisplayName("betreuer_thema enforces foreign keys")
-    void betreuer_thema_enforces_foreign_keys() {
-        assertThatThrownBy(() -> jdbcTemplate.update(
-                "insert into betreuer_thema (betreuer_id, thema_id) values (?, ?)",
-                UUID.randomUUID(), UUID.randomUUID()
-        )).isInstanceOf(DataIntegrityViolationException.class);
-    }
+  @Test
+  @DisplayName("betreuer_thema enforces foreign keys")
+  void betreuer_thema_enforces_foreign_keys() {
+    assertThatThrownBy(
+            () ->
+                jdbcTemplate.update(
+                    "insert into betreuer_thema (betreuer_id, thema_id) values (?, ?)",
+                    UUID.randomUUID(),
+                    UUID.randomUUID()))
+        .isInstanceOf(DataIntegrityViolationException.class);
+  }
 
-    @BeforeEach
-    void clearTables() {
-        jdbcTemplate.update("delete from betreuer_link");
-        jdbcTemplate.update("delete from betreuer_informationsdatei");
-        jdbcTemplate.update("delete from betreuer_fachgebiet");
-        jdbcTemplate.update("delete from betreuer_thema");
-        jdbcTemplate.update("delete from betreuer");
-        jdbcTemplate.update("delete from thema");
-    }
+  @BeforeEach
+  void clearTables() {
+    jdbcTemplate.update("delete from betreuer_link");
+    jdbcTemplate.update("delete from betreuer_informationsdatei");
+    jdbcTemplate.update("delete from betreuer_fachgebiet");
+    jdbcTemplate.update("delete from betreuer_thema");
+    jdbcTemplate.update("delete from betreuer");
+    jdbcTemplate.update("delete from thema");
+  }
 }

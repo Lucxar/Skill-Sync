@@ -12,25 +12,27 @@ import org.springframework.security.oauth2.core.AuthorizationGrantType;
 @TestConfiguration
 public class TestOAuth2ClientConfiguration {
 
-    @Bean
-    public ClientRegistrationRepository clientRegistrationRepository() {
-        ClientRegistration registration = ClientRegistration.withRegistrationId("github")
-                .clientId("test-client")
-                .clientSecret("test-secret")
-                .authorizationGrantType(AuthorizationGrantType.AUTHORIZATION_CODE)
-                .redirectUri("{baseUrl}/login/oauth2/code/{registrationId}")
-                .authorizationUri("https://github.com/login/oauth/authorize")
-                .tokenUri("https://github.com/login/oauth/access_token")
-                .userInfoUri("https://api.github.com/user")
-                .userNameAttributeName("login")
-                .scope("read:user")
-                .clientName("GitHub")
-                .build();
-        return new InMemoryClientRegistrationRepository(registration);
-    }
+  @Bean
+  public ClientRegistrationRepository clientRegistrationRepository() {
+    ClientRegistration registration =
+        ClientRegistration.withRegistrationId("github")
+            .clientId("test-client")
+            .clientSecret("test-secret")
+            .authorizationGrantType(AuthorizationGrantType.AUTHORIZATION_CODE)
+            .redirectUri("{baseUrl}/login/oauth2/code/{registrationId}")
+            .authorizationUri("https://github.com/login/oauth/authorize")
+            .tokenUri("https://github.com/login/oauth/access_token")
+            .userInfoUri("https://api.github.com/user")
+            .userNameAttributeName("login")
+            .scope("read:user")
+            .clientName("GitHub")
+            .build();
+    return new InMemoryClientRegistrationRepository(registration);
+  }
 
-    @Bean
-    public OAuth2AuthorizedClientService authorizedClientService(ClientRegistrationRepository repository) {
-        return new InMemoryOAuth2AuthorizedClientService(repository);
-    }
+  @Bean
+  public OAuth2AuthorizedClientService authorizedClientService(
+      ClientRegistrationRepository repository) {
+    return new InMemoryOAuth2AuthorizedClientService(repository);
+  }
 }

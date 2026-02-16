@@ -8,10 +8,10 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 @Testcontainers
 public abstract class TestPostgresContainer {
 
-    @Container
-    @ServiceConnection
-    public static final PostgreSQLContainer<?> POSTGRES = new PostgreSQLContainer<>("postgres:17-alpine")
-            .withDatabaseName("mydatabase_test")
-            .withUsername("myuser")
-            .withPassword("secret");
+  @Container @ServiceConnection
+  public static final PostgreSQLContainer<?> POSTGRES =
+      new PostgreSQLContainer<>("postgres:17-alpine")
+          .withDatabaseName("mydatabase_test")
+          .withUsername("myuser")
+          .withPassword("secret");
 }
