@@ -4,7 +4,7 @@ import java.util.UUID;
 
 public class BetreuerNotFoundException extends RuntimeException {
 
-    public BetreuerNotFoundException(UUID id) {
-        super("Betreuer not found: " + id);
-    }
+  public BetreuerNotFoundException(UUID id) {
+    super("Betreuer not found: " + id);
+  }
 }

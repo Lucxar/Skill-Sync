@@ -2,33 +2,31 @@ package wiegand.luca.ThesisIsComing.domainModel.valueObjects;
 
 public class Kontaktinformationen {
 
-    private String email;
-    private String Matrikelnummer;
+  private String email;
+  private String Matrikelnummer;
 
-    public Kontaktinformationen(String email, String matrikelnummer) {
-        this.email = email;
-        this.Matrikelnummer = matrikelnummer;
-    }
+  public Kontaktinformationen(String email, String matrikelnummer) {
+    this.email = email;
+    this.Matrikelnummer = matrikelnummer;
+  }
 
+  // --- Getter-Methoden ---
 
-    // --- Getter-Methoden ---
+  public String getMatrikelnummer() {
+    return Matrikelnummer;
+  }
 
-    public String getMatrikelnummer() {
-        return Matrikelnummer;
-    }
+  public String getEmail() {
+    return email;
+  }
 
-    public String getEmail() {
-        return email;
-    }
+  // --- Setter-Methoden ---
 
+  public void setMatrikelnummer(String matrikelnummer) {
+    Matrikelnummer = matrikelnummer;
+  }
 
-    // --- Setter-Methoden ---
-
-    public void setMatrikelnummer(String matrikelnummer) {
-        Matrikelnummer = matrikelnummer;
-    }
-
-    public void setEmail(String email) {
-        this.email = email;
-    }
+  public void setEmail(String email) {
+    this.email = email;
+  }
 }
