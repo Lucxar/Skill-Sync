@@ -1,7 +1,7 @@
 package wiegand.luca.ThesisIsComing.ApplicationService.security;
 
 public interface CurrentUser {
-    String login();
+  String login();
 
-    boolean hasRole(String role);
+  boolean hasRole(String role);
 }

@@ -9,11 +9,11 @@ import wiegand.luca.ThesisIsComing.ApplicationService.exception.ZuordnungNichtEr
 @ControllerAdvice
 public class SecurityControllerAdvice {
 
-    @ExceptionHandler(ZuordnungNichtErlaubtException.class)
-    public ModelAndView handleZuordnungNichtErlaubt(ZuordnungNichtErlaubtException ex) {
-        ModelAndView mav = new ModelAndView("errors/403");
-        mav.setStatus(HttpStatus.FORBIDDEN);
-        mav.addObject("message", ex.getMessage());
-        return mav;
-    }
+  @ExceptionHandler(ZuordnungNichtErlaubtException.class)
+  public ModelAndView handleZuordnungNichtErlaubt(ZuordnungNichtErlaubtException ex) {
+    ModelAndView mav = new ModelAndView("errors/403");
+    mav.setStatus(HttpStatus.FORBIDDEN);
+    mav.addObject("message", ex.getMessage());
+    return mav;
+  }
 }
