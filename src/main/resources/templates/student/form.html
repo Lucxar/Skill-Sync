@@ -1,46 +1,112 @@
 <!DOCTYPE html>
-<html lang="de" xmlns:th="http://www.thymeleaf.org">
+<html lang="de" data-bs-theme="dark" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" />
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet" />
     <link rel="stylesheet" th:href="@{/css/accessibility.css}" />
+    <link rel="stylesheet" th:href="@{/css/theme-dark.css}" />
     <title th:text="${pageTitle}">Studierende</title>
 </head>
-<body>
+<body class="d-flex flex-column min-vh-100">
 <a class="skip-link" href="#main-content">Zum Inhalt</a>
-<main id="main-content">
-    <section>
-        <h1 th:text="${pageTitle}">Studierende</h1>
-        <form th:action="${formAction}" th:object="${studentForm}" method="post">
-            <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
-            <input type="hidden" th:field="*{version}" />
-            <p th:if="${#fields.hasGlobalErrors()}" th:errors="*{*}" role="alert" aria-live="polite">Fehler</p>
-            <div>
-                <label for="name">Name</label>
-                <input type="text" id="name" th:field="*{name}" required
-                       th:attr="aria-invalid=${#fields.hasErrors('name')}, aria-describedby=${#fields.hasErrors('name')} ? 'student-name-error' : null" />
-                <p id="student-name-error" th:if="${#fields.hasErrors('name')}" th:errors="*{name}" role="alert" aria-live="polite">Fehler</p>
+
+<nav class="navbar navbar-expand-lg">
+    <div class="container">
+        <a class="navbar-brand" th:href="@{/betreuer}"><i class="bi bi-mortarboard-fill"></i> ThesisIsComing</a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#mainNav" aria-controls="mainNav" aria-expanded="false" aria-label="Navigation umschalten">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="mainNav">
+            <ul class="navbar-nav me-auto">
+                <li class="nav-item"><a class="nav-link" th:href="@{/betreuer}"><i class="bi bi-person me-1"></i>Betreuer</a></li>
+                <li class="nav-item"><a class="nav-link" th:href="@{/themen}"><i class="bi bi-journal-text me-1"></i>Themen</a></li>
+                <li class="nav-item"><a class="nav-link active" th:href="@{/studierende}"><i class="bi bi-people me-1"></i>Studierende</a></li>
+                <li class="nav-item"><a class="nav-link" th:href="@{/matching}"><i class="bi bi-diagram-3 me-1"></i>Matching</a></li>
+                <li class="nav-item" sec:authorize="hasRole('ADMIN')"><a class="nav-link" th:href="@{/admin/rollen}"><i class="bi bi-shield-lock me-1"></i>Rollen</a></li>
+            </ul>
+            <div class="navbar-nav" sec:authorize="hasAnyRole('BETREUER','STUDIERENDE')">
+                <a class="nav-link" th:href="@{/mein-profil}"><i class="bi bi-person-circle me-1"></i>Mein Profil</a>
             </div>
-            <div>
-                <label for="email">E-Mail (optional)</label>
-                <input type="email" id="email" th:field="*{email}" />
+        </div>
+    </div>
+</nav>
+
+<main id="main-content" class="container py-4 flex-grow-1">
+    <nav aria-label="Breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a th:href="@{/studierende}">Studierende</a></li>
+            <li class="breadcrumb-item active" aria-current="page" th:text="${pageTitle}">Formular</li>
+        </ol>
+    </nav>
+
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="card">
+                <div class="card-header d-flex align-items-center">
+                    <h1 class="h5 mb-0"><i class="bi bi-person me-2"></i><span th:text="${pageTitle}">Studierende</span></h1>
+                </div>
+                <div class="card-body">
+                    <form th:action="${formAction}" th:object="${studentForm}" method="post">
+                        <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+                        <input type="hidden" th:field="*{version}" />
+
+                        <div th:if="${#fields.hasGlobalErrors()}" class="alert alert-danger d-flex align-items-center mb-3" role="alert" aria-live="polite">
+                            <i class="bi bi-exclamation-triangle-fill me-2"></i>
+                            <span th:errors="*{*}">Fehler</span>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label" for="name">Name</label>
+                            <input type="text" class="form-control" id="name" th:field="*{name}" required
+                                   th:classappend="${#fields.hasErrors('name')} ? 'is-invalid'"
+                                   th:attr="aria-invalid=${#fields.hasErrors('name')}, aria-describedby=${#fields.hasErrors('name')} ? 'student-name-error' : null" />
+                            <div id="student-name-error" class="invalid-feedback" th:if="${#fields.hasErrors('name')}" th:errors="*{name}" role="alert" aria-live="polite">Fehler</div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label" for="email">E-Mail <span class="text-muted">(optional)</span></label>
+                            <input type="email" class="form-control" id="email" th:field="*{email}" />
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label" for="matrikelnummer">Matrikelnummer <span class="text-muted">(optional)</span></label>
+                            <input type="text" class="form-control" id="matrikelnummer" th:field="*{matrikelnummer}" />
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label" for="bestandeneKurse">Besuchte Veranstaltungen</label>
+                            <textarea class="form-control" id="bestandeneKurse" th:field="*{bestandeneKurse}" rows="5"></textarea>
+                            <div class="form-text">Eine pro Zeile oder mit Komma getrennt.</div>
+                        </div>
+
+                        <div class="mb-4">
+                            <label class="form-label" for="interessensgebiete">Interessensgebiete</label>
+                            <textarea class="form-control" id="interessensgebiete" th:field="*{interessensgebiete}" rows="4"></textarea>
+                            <div class="form-text">Eine pro Zeile oder mit Komma getrennt.</div>
+                        </div>
+
+                        <div class="d-flex gap-2">
+                            <button type="submit" class="btn btn-primary"><i class="bi bi-check-lg me-1"></i><span th:text="${submitLabel}">Speichern</span></button>
+                            <a class="btn btn-outline-secondary" th:href="@{/studierende}"><i class="bi bi-arrow-left me-1"></i>Zurueck zur Liste</a>
+                        </div>
+                    </form>
+                </div>
             </div>
-            <div>
-                <label for="matrikelnummer">Matrikelnummer (optional)</label>
-                <input type="text" id="matrikelnummer" th:field="*{matrikelnummer}" />
-            </div>
-            <div>
-                <label for="bestandeneKurse">Besuchte Veranstaltungen (eine pro Zeile oder mit Komma)</label>
-                <textarea id="bestandeneKurse" th:field="*{bestandeneKurse}" rows="5"></textarea>
-            </div>
-            <div>
-                <label for="interessensgebiete">Interessensgebiete (eine pro Zeile oder mit Komma)</label>
-                <textarea id="interessensgebiete" th:field="*{interessensgebiete}" rows="4"></textarea>
-            </div>
-            <button type="submit" th:text="${submitLabel}">Speichern</button>
-        </form>
-        <a th:href="@{/studierende}">Zurueck zur Liste</a>
-    </section>
+        </div>
+    </div>
 </main>
+
+<footer class="tic-footer">
+    <div class="container text-center">
+        <small>ThesisIsComing &copy; 2025</small>
+    </div>
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
