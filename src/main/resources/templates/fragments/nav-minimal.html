@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html lang="de" xmlns:th="http://www.thymeleaf.org">
+<head></head>
+<body>
+<div th:fragment="nav-minimal">
+    <a class="skip-link" href="#main-content">Zum Inhalt</a>
+
+    <nav class="navbar navbar-expand-lg">
+        <div class="container">
+            <a class="navbar-brand" th:href="@{/betreuer}">
+                <i class="bi bi-mortarboard-fill" aria-hidden="true"></i> ThesisIsComing
+            </a>
+            <button type="button" class="btn btn-link nav-link ms-auto" id="theme-toggle">
+                <i class="bi bi-sun-fill" aria-hidden="true"></i>
+            </button>
+        </div>
+    </nav>
+</div>
+</body>
+</html>

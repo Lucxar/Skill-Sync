@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="de" xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head></head>
+<body>
+<div th:fragment="nav(activePage)">
+    <a class="skip-link" href="#main-content">Zum Inhalt</a>
+
+    <nav class="navbar navbar-expand-lg">
+        <div class="container">
+            <a class="navbar-brand" th:href="@{/betreuer}">
+                <i class="bi bi-mortarboard-fill" aria-hidden="true"></i> ThesisIsComing
+            </a>
+            <button class="navbar-toggler" type="button"
+                    data-bs-toggle="collapse" data-bs-target="#mainNav"
+                    aria-controls="mainNav" aria-expanded="false"
+                    aria-label="Navigation umschalten">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="mainNav">
+                <ul class="navbar-nav me-auto">
+                    <li class="nav-item">
+                        <a class="nav-link"
+                           th:classappend="${activePage == 'betreuer'} ? 'active'"
+                           th:attr="aria-current=${activePage == 'betreuer'} ? 'page'"
+                           th:href="@{/betreuer}">
+                            <i class="bi bi-person me-1" aria-hidden="true"></i>Betreuer
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link"
+                           th:classappend="${activePage == 'themen'} ? 'active'"
+                           th:attr="aria-current=${activePage == 'themen'} ? 'page'"
+                           th:href="@{/themen}">
+                            <i class="bi bi-journal-text me-1" aria-hidden="true"></i>Themen
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link"
+                           th:classappend="${activePage == 'studierende'} ? 'active'"
+                           th:attr="aria-current=${activePage == 'studierende'} ? 'page'"
+                           th:href="@{/studierende}">
+                            <i class="bi bi-people me-1" aria-hidden="true"></i>Studierende
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link"
+                           th:classappend="${activePage == 'matching'} ? 'active'"
+                           th:attr="aria-current=${activePage == 'matching'} ? 'page'"
+                           th:href="@{/matching}">
+                            <i class="bi bi-diagram-3 me-1" aria-hidden="true"></i>Matching
+                        </a>
+                    </li>
+                    <li class="nav-item" sec:authorize="hasRole('ADMIN')">
+                        <a class="nav-link"
+                           th:classappend="${activePage == 'admin'} ? 'active'"
+                           th:attr="aria-current=${activePage == 'admin'} ? 'page'"
+                           th:href="@{/admin/rollen}">
+                            <i class="bi bi-shield-lock me-1" aria-hidden="true"></i>Rollen
+                        </a>
+                    </li>
+                </ul>
+                <div class="navbar-nav ms-auto d-flex align-items-center">
+                    <div sec:authorize="hasAnyRole('BETREUER','STUDIERENDE')">
+                        <a class="nav-link" th:href="@{/mein-profil}">
+                            <i class="bi bi-person-circle me-1" aria-hidden="true"></i>Mein Profil
+                        </a>
+                    </div>
+                    <button type="button" class="btn btn-link nav-link" id="theme-toggle">
+                        <i class="bi bi-sun-fill" aria-hidden="true"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </nav>
+</div>
+</body>
+</html>
