@@ -1,0 +1,943 @@
+/* ============================================
+   ThesisIsComing — Swiss-Style Theme
+   Dual-mode (dark / light) token system
+   Zero forced-priority declarations
+   ============================================ */
+
+/* 1. Typography (root)
+   ============================================ */
+:root {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+  font-size: 1rem;
+  line-height: 1.6;
+}
+
+/* 2. Dark Mode Tokens
+   ============================================ */
+:root,
+[data-bs-theme="dark"] {
+  /* Accent */
+  --tic-accent: #e63946;
+  --tic-accent-hover: #c1121f;
+  --tic-accent-subtle: rgba(230, 57, 70, 0.15);
+
+  /* Backgrounds */
+  --tic-bg-body: #1e1e1e;
+  --tic-bg-surface: #2d2d2d;
+  --tic-bg-elevated: #3a3a3a;
+
+  /* Border */
+  --tic-border: #444444;
+
+  /* Text */
+  --tic-text-primary: #f0f0f0;
+  --tic-text-secondary: #b0b0b0;
+  --tic-text-muted: #6c757d;
+
+  /* Semantic */
+  --tic-success: #2a9d4e;
+  --tic-success-subtle: rgba(42, 157, 78, 0.15);
+  --tic-danger: #e63946;
+  --tic-danger-subtle: rgba(230, 57, 70, 0.15);
+  --tic-warning: #f4a261;
+  --tic-warning-subtle: rgba(244, 162, 97, 0.15);
+
+  /* Admin */
+  --tic-admin-accent: #2a9d8f;
+  --tic-admin-subtle: rgba(42, 157, 143, 0.15);
+
+  /* Bootstrap overrides */
+  --bs-body-bg: var(--tic-bg-body);
+  --bs-body-color: var(--tic-text-primary);
+  --bs-border-color: var(--tic-border);
+  --bs-link-color: var(--tic-accent);
+  --bs-link-hover-color: var(--tic-accent-hover);
+  --bs-card-bg: var(--tic-bg-surface);
+  --bs-card-border-color: var(--tic-border);
+  --bs-primary: #e63946;
+  --bs-primary-rgb: 230, 57, 70;
+  --bs-secondary-color: var(--tic-text-muted);
+
+  /* Navbar variables (replaces forced-priority on nav elements) */
+  --bs-navbar-brand-color: var(--tic-text-primary);
+  --bs-navbar-brand-hover-color: var(--tic-accent-hover);
+  --bs-nav-link-color: var(--tic-text-secondary);
+  --bs-nav-link-hover-color: var(--tic-text-primary);
+  --bs-nav-link-padding-x: 0.85rem;
+  --bs-nav-link-padding-y: 0.5rem;
+}
+
+/* 3. Light Mode Tokens
+   ============================================ */
+[data-bs-theme="light"] {
+  /* Accent */
+  --tic-accent: #c1121f;
+  --tic-accent-hover: #9b111e;
+  --tic-accent-subtle: rgba(193, 18, 31, 0.10);
+
+  /* Backgrounds */
+  --tic-bg-body: #f8f8f8;
+  --tic-bg-surface: #ffffff;
+  --tic-bg-elevated: #f0f0f0;
+
+  /* Border */
+  --tic-border: #dee2e6;
+
+  /* Text */
+  --tic-text-primary: #212529;
+  --tic-text-secondary: #495057;
+  --tic-text-muted: #6c757d;
+
+  /* Semantic */
+  --tic-success: #198754;
+  --tic-success-subtle: rgba(25, 135, 84, 0.10);
+  --tic-danger: #dc3545;
+  --tic-danger-subtle: rgba(220, 53, 69, 0.10);
+  --tic-warning: #fd7e14;
+  --tic-warning-subtle: rgba(253, 126, 20, 0.10);
+
+  /* Admin */
+  --tic-admin-accent: #1a7f72;
+  --tic-admin-subtle: rgba(26, 127, 114, 0.10);
+
+  /* Bootstrap overrides */
+  --bs-body-bg: var(--tic-bg-body);
+  --bs-body-color: var(--tic-text-primary);
+  --bs-border-color: var(--tic-border);
+  --bs-link-color: var(--tic-accent);
+  --bs-link-hover-color: var(--tic-accent-hover);
+  --bs-card-bg: var(--tic-bg-surface);
+  --bs-card-border-color: var(--tic-border);
+  --bs-primary: #c1121f;
+  --bs-primary-rgb: 193, 18, 31;
+  --bs-secondary-color: var(--tic-text-muted);
+
+  /* Navbar variables */
+  --bs-navbar-brand-color: var(--tic-text-primary);
+  --bs-navbar-brand-hover-color: var(--tic-accent-hover);
+  --bs-nav-link-color: var(--tic-text-secondary);
+  --bs-nav-link-hover-color: var(--tic-text-primary);
+  --bs-nav-link-padding-x: 0.85rem;
+  --bs-nav-link-padding-y: 0.5rem;
+}
+
+/* 4. Admin Context Scope
+   ============================================ */
+.tic-admin-context {
+  --tic-accent: var(--tic-admin-accent);
+  --tic-accent-hover: #1a6b60;
+  --tic-accent-subtle: var(--tic-admin-subtle);
+  --bs-link-color: var(--tic-admin-accent);
+  --bs-link-hover-color: #1a6b60;
+}
+
+/* 5. Base Typography
+   ============================================ */
+body {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+  background-color: var(--tic-bg-body);
+  color: var(--tic-text-primary);
+  line-height: 1.6;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  color: var(--tic-text-primary);
+  font-weight: 600;
+}
+
+h1 {
+  font-weight: 700;
+}
+
+a {
+  color: var(--tic-accent);
+  text-decoration: none;
+  transition: color 0.15s ease;
+}
+
+a:hover {
+  color: var(--tic-accent-hover);
+}
+
+p {
+  color: var(--tic-text-secondary);
+}
+
+small,
+.text-muted,
+.form-text {
+  color: var(--bs-secondary-color);
+}
+
+hr {
+  border-color: var(--tic-border);
+  opacity: 1;
+}
+
+/* 6. Navbar
+   ============================================ */
+.navbar {
+  background-color: var(--tic-bg-surface);
+  border-bottom: 1px solid var(--tic-border);
+  padding: 0.75rem 0;
+}
+
+.navbar-brand {
+  color: var(--bs-navbar-brand-color);
+  font-weight: 700;
+  font-size: 1.15rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.navbar-brand:hover {
+  color: var(--bs-navbar-brand-hover-color);
+}
+
+.navbar-nav .nav-link {
+  color: var(--bs-nav-link-color);
+  font-weight: 500;
+  font-size: 0.9rem;
+  padding: var(--bs-nav-link-padding-y) var(--bs-nav-link-padding-x);
+  border-radius: 0.375rem;
+  transition: all 0.15s ease;
+}
+
+.navbar-nav .nav-link:hover {
+  color: var(--bs-nav-link-hover-color);
+  background-color: var(--tic-bg-elevated);
+}
+
+.navbar-nav .nav-link.active {
+  color: var(--tic-accent);
+  background-color: var(--tic-accent-subtle);
+}
+
+.navbar-toggler {
+  border-color: var(--tic-border);
+  padding: 0.35rem 0.65rem;
+}
+
+/* 7. Cards
+   ============================================ */
+.card {
+  background-color: var(--tic-bg-surface);
+  border: 1px solid var(--tic-border);
+  border-radius: 0.75rem;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+}
+
+.card-header {
+  background-color: transparent;
+  border-bottom: 1px solid var(--tic-border);
+  padding: 1rem 1.25rem;
+  font-weight: 600;
+}
+
+.card-header .h5,
+.card-header h5,
+.card-header h2 {
+  font-size: 1rem;
+  margin-bottom: 0;
+}
+
+.card-body {
+  padding: 1.25rem;
+}
+
+.card-footer {
+  background-color: transparent;
+  border-top: 1px solid var(--tic-border);
+  padding: 0.75rem 1.25rem;
+}
+
+/* 8. Form Controls
+   ============================================ */
+.form-label {
+  color: var(--tic-text-secondary);
+  font-weight: 500;
+  font-size: 0.875rem;
+  margin-bottom: 0.375rem;
+}
+
+.form-control,
+.form-select {
+  background-color: var(--tic-bg-elevated);
+  border: 1px solid var(--tic-border);
+  color: var(--tic-text-primary);
+  border-radius: 0.5rem;
+  padding: 0.5rem 0.75rem;
+  font-size: 0.9rem;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.form-control::placeholder {
+  color: var(--tic-text-muted);
+}
+
+.form-control:focus,
+.form-select:focus {
+  background-color: var(--tic-bg-elevated);
+  border-color: var(--tic-accent);
+  color: var(--tic-text-primary);
+  box-shadow: 0 0 0 3px var(--tic-accent-subtle);
+}
+
+.form-control:disabled,
+.form-select:disabled {
+  background-color: var(--tic-bg-body);
+  color: var(--tic-text-muted);
+  opacity: 0.7;
+}
+
+.form-control.is-invalid,
+.form-select.is-invalid {
+  border-color: var(--tic-danger);
+  box-shadow: none;
+}
+
+.form-control.is-invalid:focus {
+  box-shadow: 0 0 0 3px var(--tic-danger-subtle);
+}
+
+.invalid-feedback {
+  color: var(--tic-danger);
+  font-size: 0.8125rem;
+}
+
+.form-text {
+  font-size: 0.8125rem;
+}
+
+.input-group-text {
+  background-color: var(--tic-bg-elevated);
+  border: 1px solid var(--tic-border);
+  color: var(--tic-text-muted);
+  border-radius: 0.5rem;
+}
+
+textarea.form-control {
+  min-height: 100px;
+}
+
+/* File input */
+.form-control[type="file"] {
+  padding: 0.375rem 0.75rem;
+}
+
+.form-control[type="file"]::file-selector-button {
+  background-color: var(--tic-bg-body);
+  color: var(--tic-text-secondary);
+  border: 0;
+  border-right: 1px solid var(--tic-border);
+  padding: 0.375rem 0.75rem;
+  margin: -0.375rem 0.75rem -0.375rem -0.75rem;
+  transition: background-color 0.15s ease;
+}
+
+.form-control[type="file"]::file-selector-button:hover {
+  background-color: var(--tic-bg-elevated);
+}
+
+/* Floating labels */
+.form-floating > .form-control,
+.form-floating > .form-select {
+  background-color: var(--tic-bg-elevated);
+  border-color: var(--tic-border);
+  color: var(--tic-text-primary);
+}
+
+.form-floating > label {
+  color: var(--tic-text-muted);
+}
+
+/* Form check */
+.form-check-input {
+  background-color: var(--tic-bg-elevated);
+  border-color: var(--tic-border);
+}
+
+.form-check-input:checked {
+  background-color: var(--tic-accent);
+  border-color: var(--tic-accent);
+}
+
+.form-check-input:focus {
+  box-shadow: 0 0 0 3px var(--tic-accent-subtle);
+  border-color: var(--tic-accent);
+}
+
+.form-check-label {
+  color: var(--tic-text-secondary);
+}
+
+/* 9. Buttons
+   ============================================ */
+.btn {
+  font-weight: 500;
+  font-size: 0.875rem;
+  border-radius: 0.5rem;
+  padding: 0.5rem 1rem;
+  transition: all 0.15s ease;
+}
+
+.btn-primary {
+  background-color: var(--tic-accent);
+  border-color: var(--tic-accent);
+  color: #ffffff;
+}
+
+.btn-primary:hover {
+  background-color: var(--tic-accent-hover);
+  border-color: var(--tic-accent-hover);
+  color: #ffffff;
+}
+
+.btn-outline-primary {
+  border-color: var(--tic-accent);
+  color: var(--tic-accent);
+}
+
+.btn-outline-primary:hover {
+  background-color: var(--tic-accent);
+  border-color: var(--tic-accent);
+  color: #ffffff;
+}
+
+.btn-outline-secondary {
+  border-color: var(--tic-border);
+  color: var(--tic-text-secondary);
+}
+
+.btn-outline-secondary:hover {
+  background-color: var(--tic-bg-elevated);
+  border-color: var(--tic-text-muted);
+  color: var(--tic-text-primary);
+}
+
+.btn-success {
+  background-color: var(--tic-success);
+  border-color: var(--tic-success);
+  color: #ffffff;
+}
+
+.btn-success:hover {
+  filter: brightness(0.9);
+  color: #ffffff;
+}
+
+.btn-danger {
+  background-color: var(--tic-danger);
+  border-color: var(--tic-danger);
+  color: #ffffff;
+}
+
+.btn-danger:hover {
+  filter: brightness(0.9);
+  color: #ffffff;
+}
+
+.btn-outline-danger {
+  border-color: var(--tic-danger);
+  color: var(--tic-danger);
+}
+
+.btn-outline-danger:hover {
+  background-color: var(--tic-danger);
+  border-color: var(--tic-danger);
+  color: #ffffff;
+}
+
+.btn-link {
+  color: var(--tic-accent);
+  text-decoration: none;
+  padding: 0;
+}
+
+.btn-link:hover {
+  color: var(--tic-accent-hover);
+}
+
+.btn:disabled,
+.btn.disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.btn-sm {
+  padding: 0.3rem 0.65rem;
+  font-size: 0.8125rem;
+}
+
+.btn-lg {
+  padding: 0.65rem 1.5rem;
+  font-size: 1rem;
+}
+
+/* Icon-only buttons */
+.btn-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2rem;
+  height: 2rem;
+  padding: 0;
+  border-radius: 0.375rem;
+}
+
+/* 10. Tables
+   ============================================ */
+.table {
+  --bs-table-bg: transparent;
+  --bs-table-color: var(--tic-text-primary);
+  --bs-table-border-color: var(--tic-border);
+  --bs-table-hover-bg: var(--tic-bg-elevated);
+  --bs-table-hover-color: var(--tic-text-primary);
+  --bs-table-striped-bg: var(--tic-bg-elevated);
+  --bs-table-striped-color: var(--tic-text-primary);
+  margin-bottom: 0;
+}
+
+.table > thead > tr > th {
+  background-color: var(--tic-bg-body);
+  color: var(--tic-text-secondary);
+  font-weight: 600;
+  font-size: 0.8125rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  padding: 0.75rem 1rem;
+  border-bottom: 1px solid var(--tic-border);
+}
+
+.table > tbody > tr > td {
+  padding: 0.75rem 1rem;
+  vertical-align: middle;
+  border-bottom: 1px solid var(--tic-border);
+}
+
+.table > tbody > tr:last-child > td {
+  border-bottom: none;
+}
+
+/* 11. List Groups
+   ============================================ */
+.list-group {
+  border-radius: 0.75rem;
+}
+
+.list-group-item {
+  background-color: transparent;
+  border: none;
+  border-bottom: 1px solid var(--tic-border);
+  color: var(--tic-text-primary);
+  padding: 0.85rem 1.25rem;
+  transition: background-color 0.15s ease;
+}
+
+.list-group-item:last-child {
+  border-bottom: none;
+}
+
+.list-group-item-action {
+  cursor: pointer;
+}
+
+.list-group-item-action:hover,
+.list-group-item-action:focus {
+  background-color: var(--tic-bg-elevated);
+  color: var(--tic-text-primary);
+}
+
+/* 12. Badges / Tags
+   ============================================ */
+.badge {
+  font-weight: 500;
+  font-size: 0.75rem;
+  padding: 0.35em 0.65em;
+}
+
+.tic-tag {
+  display: inline-block;
+  background-color: var(--tic-accent-subtle);
+  color: var(--tic-accent);
+  padding: 0.25rem 0.75rem;
+  border-radius: 2rem;
+  font-size: 0.8125rem;
+  font-weight: 500;
+  margin: 0.15rem;
+}
+
+.tic-tag--success {
+  background-color: var(--tic-success-subtle);
+  color: var(--tic-success);
+}
+
+.tic-tag--danger {
+  background-color: var(--tic-danger-subtle);
+  color: var(--tic-danger);
+}
+
+.tic-tag--warning {
+  background-color: var(--tic-warning-subtle);
+  color: var(--tic-warning);
+}
+
+.tic-tag--info {
+  background-color: var(--tic-accent-subtle);
+  color: var(--tic-accent);
+}
+
+/* 13. Alerts
+   ============================================ */
+.alert {
+  border-radius: 0.5rem;
+  border: none;
+  font-size: 0.9rem;
+  padding: 0.75rem 1rem;
+}
+
+.alert-danger {
+  background-color: var(--tic-danger-subtle);
+  color: var(--tic-danger);
+}
+
+.alert-warning {
+  background-color: var(--tic-warning-subtle);
+  color: var(--tic-warning);
+}
+
+.alert-success {
+  background-color: var(--tic-success-subtle);
+  color: var(--tic-success);
+}
+
+.alert-info {
+  background-color: var(--tic-accent-subtle);
+  color: var(--tic-accent);
+}
+
+/* 14. Progress Bars
+   ============================================ */
+.progress {
+  background-color: var(--tic-bg-elevated);
+  border-radius: 1rem;
+  height: 0.5rem;
+}
+
+.progress-bar {
+  background: linear-gradient(90deg, var(--tic-accent), var(--tic-accent-hover));
+  border-radius: 1rem;
+}
+
+/* 15. Custom Components
+   ============================================ */
+
+/* Page Header */
+.tic-page-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.5rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid var(--tic-border);
+}
+
+.tic-page-header h1 {
+  margin-bottom: 0;
+  font-size: 1.65rem;
+}
+
+.tic-page-header .tic-actions {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+}
+
+/* Empty State */
+.tic-empty-state {
+  text-align: center;
+  padding: 3rem 1.5rem;
+  color: var(--tic-text-muted);
+}
+
+.tic-empty-state i {
+  font-size: 3rem;
+  margin-bottom: 0.75rem;
+  display: block;
+  opacity: 0.5;
+}
+
+.tic-empty-state p {
+  color: var(--tic-text-muted);
+  margin-bottom: 0;
+}
+
+/* Score Display */
+.tic-score {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.tic-score .progress {
+  flex-grow: 1;
+  height: 0.5rem;
+}
+
+.tic-score .badge {
+  min-width: 3rem;
+  text-align: center;
+  font-size: 0.8125rem;
+}
+
+/* Match Card */
+.tic-match-card {
+  background-color: var(--tic-bg-surface);
+  border: 1px solid var(--tic-border);
+  border-radius: 0.75rem;
+  padding: 1.25rem;
+  margin-bottom: 1rem;
+  transition: border-color 0.15s ease;
+}
+
+.tic-match-card:hover {
+  border-color: var(--tic-accent);
+}
+
+/* Error Page */
+.tic-error-page {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 60vh;
+  text-align: center;
+}
+
+.tic-error-page .tic-error-code {
+  font-size: 5rem;
+  font-weight: 700;
+  color: var(--tic-text-muted);
+  line-height: 1;
+  margin-bottom: 0.5rem;
+}
+
+.tic-error-page .tic-error-icon {
+  font-size: 4rem;
+  color: var(--tic-text-muted);
+  margin-bottom: 1rem;
+  opacity: 0.5;
+}
+
+.tic-error-page p {
+  color: var(--tic-text-secondary);
+  font-size: 1.1rem;
+  max-width: 400px;
+}
+
+/* Breadcrumb */
+.breadcrumb {
+  background: transparent;
+  padding: 0;
+  margin-bottom: 1rem;
+  font-size: 0.875rem;
+}
+
+.breadcrumb-item a {
+  color: var(--tic-text-muted);
+}
+
+.breadcrumb-item a:hover {
+  color: var(--tic-accent);
+}
+
+.breadcrumb-item.active {
+  color: var(--tic-text-secondary);
+}
+
+.breadcrumb-item + .breadcrumb-item::before {
+  color: var(--tic-text-muted);
+}
+
+/* Inline action row */
+.tic-inline-actions {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+/* Section within a card */
+.tic-section + .tic-section {
+  border-top: 1px solid var(--tic-border);
+  padding-top: 1rem;
+  margin-top: 1rem;
+}
+
+/* Link item in detail pages */
+.tic-link-item {
+  padding: 0.75rem 0;
+  border-bottom: 1px solid var(--tic-border);
+}
+
+.tic-link-item:last-child {
+  border-bottom: none;
+}
+
+/* File item in detail pages */
+.tic-file-item {
+  padding: 0.75rem 0;
+  border-bottom: 1px solid var(--tic-border);
+}
+
+.tic-file-item:last-child {
+  border-bottom: none;
+  padding-bottom: 0;
+}
+
+/* Markdown prose styling */
+.tic-prose {
+  color: var(--tic-text-secondary);
+  line-height: 1.7;
+}
+
+.tic-prose h1,
+.tic-prose h2,
+.tic-prose h3 {
+  margin-top: 1.5rem;
+  margin-bottom: 0.75rem;
+}
+
+.tic-prose p {
+  margin-bottom: 1rem;
+}
+
+.tic-prose code {
+  background-color: var(--tic-bg-elevated);
+  padding: 0.15rem 0.4rem;
+  border-radius: 0.25rem;
+  font-size: 0.875em;
+  color: var(--tic-accent-hover);
+}
+
+.tic-prose pre {
+  background-color: var(--tic-bg-elevated);
+  border: 1px solid var(--tic-border);
+  border-radius: 0.5rem;
+  padding: 1rem;
+  overflow-x: auto;
+}
+
+.tic-prose pre code {
+  background: none;
+  padding: 0;
+}
+
+.tic-prose ul,
+.tic-prose ol {
+  padding-left: 1.5rem;
+  margin-bottom: 1rem;
+}
+
+.tic-prose a {
+  color: var(--tic-accent);
+}
+
+.tic-prose a:hover {
+  color: var(--tic-accent-hover);
+  text-decoration: underline;
+}
+
+.tic-prose blockquote {
+  border-left: 3px solid var(--tic-accent);
+  padding-left: 1rem;
+  margin-left: 0;
+  color: var(--tic-text-muted);
+}
+
+/* 16. Utilities
+   ============================================ */
+.tic-fade-in {
+  animation: ticFadeIn 0.3s ease-in;
+}
+
+@keyframes ticFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.tic-hover-lift {
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.tic-hover-lift:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+/* Footer */
+.tic-footer {
+  background-color: var(--tic-bg-surface);
+  border-top: 1px solid var(--tic-border);
+  padding: 1rem 0;
+  margin-top: auto;
+}
+
+.tic-footer small {
+  color: var(--tic-text-muted);
+}
+
+/* 17. Autofill Override
+   ============================================ */
+input:-webkit-autofill,
+input:-webkit-autofill:hover,
+input:-webkit-autofill:focus,
+textarea:-webkit-autofill,
+textarea:-webkit-autofill:focus,
+select:-webkit-autofill,
+select:-webkit-autofill:focus {
+  -webkit-text-fill-color: var(--tic-text-primary);
+  -webkit-box-shadow: 0 0 0 1000px var(--tic-bg-elevated) inset;
+  transition: background-color 5000s ease-in-out 0s;
+}
+
+/* 18. Responsive Overrides
+   ============================================ */
+@media (max-width: 767.98px) {
+  .tic-page-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.75rem;
+  }
+
+  .tic-page-header .tic-actions {
+    width: 100%;
+  }
+
+  .tic-page-header .tic-actions .btn {
+    flex: 1;
+  }
+
+  .card-body {
+    padding: 1rem;
+  }
+
+  .tic-inline-actions {
+    flex-direction: column;
+    align-items: stretch;
+  }
+}
+
+/* 19. Select Dropdown
+   ============================================ */
+.form-select option {
+  background-color: var(--tic-bg-elevated);
+  color: var(--tic-text-primary);
+}
